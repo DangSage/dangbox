@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=3 uid="uid://cyvo4akylmtuh"]
+
+[ext_resource type="Script" uid="uid://500fregbq5fs" path="res://scripts/mainscreen.gd" id="1_beux7"]
+[ext_resource type="FontFile" uid="uid://b1rfo27mefj6b" path="res://assets/fonts/HEXAGON_.TTF" id="2_bxvkp"]
+
+[node name="main_menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_beux7")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+anchor_left = 0.0347222
+anchor_top = 0.0617284
+anchor_right = 0.260417
+anchor_bottom = 0.0972222
+theme_override_colors/font_shadow_color = Color(0.0627451, 0.0627451, 0.0627451, 1)
+text = "No License, Version alpha x.xxxxx"
+metadata/_edit_use_anchors_ = true
+
+[node name="VerticalContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.0694444
+anchor_top = 0.736111
+anchor_right = 0.261285
+anchor_bottom = 0.947531
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="play_host" type="Button" parent="VerticalContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Host World"
+
+[node name="play_connect" type="Button" parent="VerticalContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Multiplayer"
+
+[node name="settings" type="Button" parent="VerticalContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Settings"
+
+[node name="quit" type="Button" parent="VerticalContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Quit Game"
+
+[node name="Title" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.315972
+anchor_top = 0.0617284
+anchor_right = 0.904514
+anchor_bottom = 0.25463
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_shadow_color = Color(0.0627451, 0.0627451, 0.0627451, 1)
+theme_override_constants/outline_size = 5
+theme_override_constants/shadow_offset_y = 6
+theme_override_constants/shadow_outline_size = 1
+theme_override_fonts/normal_font = ExtResource("2_bxvkp")
+theme_override_font_sizes/normal_font_size = 106
+text = "dangBOX"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+horizontal_alignment = 1
+vertical_alignment = 3
+visible_characters_behavior = 1
+metadata/_edit_use_anchors_ = true
+
+[connection signal="pressed" from="VerticalContainer/play_host" to="." method="_onPlayHostPressed"]
+[connection signal="pressed" from="VerticalContainer/play_connect" to="." method="_onPlayConnectPressed"]
+[connection signal="pressed" from="VerticalContainer/settings" to="." method="_onSettingsPressed"]
+[connection signal="pressed" from="VerticalContainer/quit" to="." method="_onQuitPressed"]
