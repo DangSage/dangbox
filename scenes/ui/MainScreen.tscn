@@ -1,16 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://cyvo4akylmtuh"]
+[gd_scene load_steps=2 format=3 uid="uid://cyvo4akylmtuh"]
 
-[ext_resource type="Script" uid="uid://500fregbq5fs" path="res://scripts/mainscreen.gd" id="1_beux7"]
 [ext_resource type="FontFile" uid="uid://b1rfo27mefj6b" path="res://assets/fonts/HEXAGON_.TTF" id="2_bxvkp"]
 
-[node name="main_menu" type="Control"]
+[node name="MainScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_beux7")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
@@ -75,8 +73,3 @@ horizontal_alignment = 1
 vertical_alignment = 3
 visible_characters_behavior = 1
 metadata/_edit_use_anchors_ = true
-
-[connection signal="pressed" from="VerticalContainer/play_host" to="." method="_onPlayHostPressed"]
-[connection signal="pressed" from="VerticalContainer/play_connect" to="." method="_onPlayConnectPressed"]
-[connection signal="pressed" from="VerticalContainer/settings" to="." method="_onSettingsPressed"]
-[connection signal="pressed" from="VerticalContainer/quit" to="." method="_onQuitPressed"]

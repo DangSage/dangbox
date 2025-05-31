@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://t0h5ffi75t2n"]
+
+[node name="_Camera" type="Node"]
+
+[node name="HeadTarget" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.1)
+
+[node name="CameraTarget" type="Node3D" parent="HeadTarget"]
+
+[node name="ActualHead" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.1)
+
+[node name="PlayerInput" type="Camera3D" parent="ActualHead" groups=["cameras"]]
+cull_mask = 1048063
+doppler_tracking = 1
+current = true
+fov = 90.0

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="dangbox-game"
-run/main_scene="res://scenes/mainscreen.tscn"
+run/main_scene="res://scenes/ui/MainScreen.tscn"
 config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 

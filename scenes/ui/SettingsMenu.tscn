@@ -1,0 +1,107 @@
+[gd_scene load_steps=2 format=3 uid="uid://oh158e1sqtbv"]
+
+[ext_resource type="Theme" uid="uid://bgn7t6gvqmjdb" path="res://scenes/ui/dangui_theme.tres" id="1_gtm51"]
+
+[node name="SettingsMenu" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_gtm51")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.129412)
+
+[node name="VerticalContainer" type="VBoxContainer" parent="."]
+layout_direction = 4
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -202.0
+offset_top = -59.0
+offset_right = 202.0
+offset_bottom = 59.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+
+[node name="ProgressBar_FOV" type="ProgressBar" parent="VerticalContainer"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+max_value = 120.0
+value = 90.0
+rounded = true
+show_percentage = false
+
+[node name="RichTextLabel" type="RichTextLabel" parent="VerticalContainer/ProgressBar_FOV"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "FOV : "
+scroll_active = false
+context_menu_enabled = true
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator3" type="HSeparator" parent="VerticalContainer"]
+layout_mode = 2
+
+[node name="TextEntry_Saves" type="HSplitContainer" parent="VerticalContainer"]
+layout_mode = 2
+
+[node name="LineEdit" type="LineEdit" parent="VerticalContainer/TextEntry_Saves"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+placeholder_text = "~/.config/dangbox/worlds/"
+
+[node name="RichTextLabel" type="RichTextLabel" parent="VerticalContainer/TextEntry_Saves"]
+layout_mode = 2
+text = "Save Directory"
+scroll_active = false
+context_menu_enabled = true
+vertical_alignment = 1
+
+[node name="Graphics_Tree" type="Tree" parent="VerticalContainer"]
+custom_minimum_size = Vector2(100, 25)
+layout_mode = 2
+column_titles_visible = true
+allow_reselect = true
+allow_rmb_select = true
+
+[node name="GridContainer" type="GridContainer" parent="VerticalContainer"]
+layout_direction = 4
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+columns = 2
+
+[node name="button_keybinds" type="Button" parent="VerticalContainer/GridContainer"]
+custom_minimum_size = Vector2(200, 25)
+layout_mode = 2
+size_flags_vertical = 3
+text = "Keybinds"
+metadata/_edit_use_anchors_ = true
+
+[node name="button_exit" type="Button" parent="VerticalContainer/GridContainer"]
+custom_minimum_size = Vector2(200, 25)
+layout_mode = 2
+size_flags_vertical = 3
+text = "Exit Menu"
+metadata/_edit_use_anchors_ = true

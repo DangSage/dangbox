@@ -1,103 +1,104 @@
 using Godot;
-using System;
+using SharpNBT;
 
-public partial class EntityNBT : NBT {
-    public EntityNBT() {
-        // Initialize default properties
-        SetProperty("base_speed", 3.0f); // Float
-        SetProperty("jump_velocity", 4.0f); // Float
-        SetProperty("sensitivity", 0.001f); // Float
-        SetProperty("acceleration", 5.0f); // Float
-        SetProperty("gravity", ProjectSettings.GetSetting("physics/3d/default_gravity"));
+namespace DangboxGame.Scripts.NBT {
+	public partial class EntityNBT : NBT {
+		public Node Owner { get; set; }
 
-        // Speed modifiers
-        SetProperty("speed_modifiers", new Godot.Collections.Dictionary
-        {
-            { "crouch", 0.5f }, // Float
-            { "sprint", 1.4f }, // Float
-            { "default", 1.0f } // Float
-        });
+		public EntityNBT(string name = "root") : base(new CompoundTag(name) {
+			new FloatTag("base_speed", 3.0f),
+			new FloatTag("jump_velocity", 4.0f),
+			new FloatTag("sensitivity", 0.001f),
+			new FloatTag("acceleration", 5.0f),
+			new FloatTag("gravity", (float)ProjectSettings.GetSetting("physics/3d/default_gravity")),
+			new CompoundTag("speed_modifiers") {
+				new FloatTag("crouch", 0.5f),
+				new FloatTag("sprint", 1.4f),
+				new FloatTag("default", 1.0f)
+			},
+			new CompoundTag("inventory") {
+				new ListTag("items", TagType.String),
+				new IntTag("capacity", 10)
+			},
+			new CompoundTag("health") {
+				new IntTag("current", 1),
+				new IntTag("max", 1)
+			},
+			new ListTag("transform", TagType.Float) {
+				// Position (x, y, z)
+				new FloatTag("position_x", 0.0f), new FloatTag("position_y", 0.0f), new FloatTag("position_z", 0.0f),
+				// Velocity (x, y, z)
+				new FloatTag("velocity_x", 0.0f), new FloatTag("velocity_y", 0.0f), new FloatTag("velocity_z", 0.0f),
+				// Rotation (x, y, z)
+				new FloatTag("rotation_x", 0.0f), new FloatTag("rotation_y", 0.0f), new FloatTag("rotation_z", 0.0f),
+				// Scale (x, y, z)
+				new FloatTag("scale_x", 1.0f), new FloatTag("scale_y", 1.0f), new FloatTag("scale_z", 1.0f)
+			}
+		}) { }
 
-        // Inventory
-        SetProperty("inventory", new Godot.Collections.Dictionary
-        {
-            { "items", new Godot.Collections.Array() }, // Array
-            { "capacity", 10 } // Int
-        });
+		public override byte[] Serialize(string path = null) {
+			if (Owner is Node3D node) {
+				var transformTag = GetProperty<ListTag>("transform");
+				if (transformTag != null) {
+					// Update position
+					transformTag[0] = new FloatTag("position_x", node.Position.X);
+					transformTag[1] = new FloatTag("position_y", node.Position.Y);
+					transformTag[2] = new FloatTag("position_z", node.Position.Z);
 
-        // Health
-        SetProperty("health", new Godot.Collections.Dictionary
-        {
-            { "current", 1 }, // Int
-            { "max", 1 } // Int
-        });
+					// Update velocity (if applicable, otherwise leave as is)
+					// Velocity is not directly available in Node3D, so it may need to be updated elsewhere.
 
-        // Position
-        SetProperty("position", new Godot.Collections.Dictionary
-        {
-            { "x", 0.0f }, // Float
-            { "y", 0.0f }, // Float
-            { "z", 0.0f } // Float
-        });
+					// Update rotation
+					transformTag[6] = new FloatTag("rotation_x", node.Rotation.X);
+					transformTag[7] = new FloatTag("rotation_y", node.Rotation.Y);
+					transformTag[8] = new FloatTag("rotation_z", node.Rotation.Z);
 
-        // Velocity
-        SetProperty("velocity", new Godot.Collections.Dictionary
-        {
-            { "x", 0.0f }, // Float
-            { "y", 0.0f }, // Float
-            { "z", 0.0f } // Float
-        });
+					// Update scale
+					transformTag[9] = new FloatTag("scale_x", node.Scale.X);
+					transformTag[10] = new FloatTag("scale_y", node.Scale.Y);
+					transformTag[11] = new FloatTag("scale_z", node.Scale.Z);
+				}
+			}
 
-        // Rotation
-        SetProperty("rotation", new Godot.Collections.Dictionary
-        {
-            { "x", 0.0f }, // Float
-            { "y", 0.0f }, // Float
-            { "z", 0.0f } // Float
-        });
+			return base.Serialize(path);
+		}
 
-        // Rotation in degrees
-        SetProperty("rotation_degrees", new Godot.Collections.Dictionary
-        {
-            { "x", 0.0f }, // Float
-            { "y", 0.0f }, // Float
-            { "z", 0.0f } // Float
-        });
+		public void ApplyTransform(Node3D node) {
+			var transformTag = GetProperty<ListTag>("transform");
+			if (transformTag != null && transformTag.Count >= 12) {
+				// Apply position
+				node.Position = new Vector3(
+					((FloatTag)transformTag[0]).Value,
+					((FloatTag)transformTag[1]).Value,
+					((FloatTag)transformTag[2]).Value
+				);
 
-        // Scale
-        SetProperty("scale", new Godot.Collections.Dictionary
-        {
-            { "x", 1.0f }, // Float
-            { "y", 1.0f }, // Float
-            { "z", 1.0f } // Float
-        });
-    }
+				// Apply velocity (if applicable, otherwise skip)
+				// Velocity is not directly applicable to Node3D.
 
-    public float GetCurrentSpeed(string activeModifier) {
-        float baseSpeed = GetProperty<float>("base_speed");
-        Godot.Collections.Dictionary modifiers = GetProperty<Godot.Collections.Dictionary>("speed_modifiers");
+				// Apply rotation
+				node.Rotation = new Vector3(
+					((FloatTag)transformTag[6]).Value,
+					((FloatTag)transformTag[7]).Value,
+					((FloatTag)transformTag[8]).Value
+				);
 
-        if (modifiers == null) {
-            GD.PrintErr("Speed modifiers dictionary is null!");
-            return baseSpeed;
-        }
-        if (modifiers.Count == 0) {
-            GD.PrintErr("Speed modifiers dictionary is empty!");
-            return baseSpeed;
-        }
-        if (string.IsNullOrEmpty(activeModifier)) {
-            GD.PrintErr("Active modifier is null or empty!");
-            return baseSpeed;
-        }
-        if (!modifiers.ContainsKey(activeModifier)) {
-            GD.PrintErr($"Active modifier '{activeModifier}' not found in speed modifiers!");
-            return baseSpeed;
-        }
+				// Apply scale
+				node.Scale = new Vector3(
+					((FloatTag)transformTag[9]).Value,
+					((FloatTag)transformTag[10]).Value,
+					((FloatTag)transformTag[11]).Value
+				);
+			}
+		}
 
-        float modifier = (float)modifiers[activeModifier];
-        return baseSpeed * modifier;
-    }
-
-    // inherits from NBT all the methods
-    
+		public float GetCurrentSpeed(string activeModifier) {
+			float baseSpeed = GetProperty<float>("base_speed");
+			if (GetProperty<CompoundTag>("speed_modifiers")?.TryGetValue<FloatTag>(activeModifier, out var tag) == true) {
+				return baseSpeed * tag.Value;
+			}
+			GD.PrintErr($"Invalid or missing speed modifier: '{activeModifier}'");
+			return baseSpeed;
+		}
+	}
 }

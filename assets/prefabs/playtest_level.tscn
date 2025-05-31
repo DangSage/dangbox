@@ -1,0 +1,61 @@
+[gd_scene load_steps=6 format=3 uid="uid://fa6uaxtkbi0s"]
+
+[ext_resource type="Material" uid="uid://dfxo64ecwact5" path="res://assets/materials/test.res" id="1_sv2be"]
+[ext_resource type="Material" uid="uid://crl1ca4sry2g4" path="res://assets/materials/player_character_sample.tres" id="2_id1dn"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_lpvoh"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_at5dv"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_at5dv"]
+viewport_path = NodePath("Objects/Sprite3D2/SubViewport")
+
+[node name="Objects" type="Node3D"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.496765, 0)
+material_override = ExtResource("1_sv2be")
+gi_lightmap_texel_scale = 1.6101
+use_collision = true
+size = Vector3(100, 1, 100)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.47116, -2.59946, 0)
+material_override = ExtResource("1_sv2be")
+gi_lightmap_texel_scale = 1.6101
+use_collision = true
+size = Vector3(6.94824, 7.2497, 9.01709)
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.8695, -1.61309, 5.64637)
+material_override = ExtResource("1_sv2be")
+gi_lightmap_texel_scale = 1.6101
+use_collision = true
+size = Vector3(3.22949, 6.75047, 2.13611)
+
+[node name="RigidBody3D2" type="RigidBody3D" parent="."]
+physics_interpolation_mode = 1
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.619664, 3.34139, 0)
+can_sleep = false
+linear_damp_mode = 1
+angular_damp_mode = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D2"]
+material_override = ExtResource("2_id1dn")
+mesh = SubResource("BoxMesh_lpvoh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D2"]
+transform = Transform3D(1.02, 0, 0, 0, 1.02, 0, 0, 0, 1.02, 0, 0, 0)
+shape = SubResource("BoxShape3D_at5dv")
+
+[node name="Sprite3D2" type="Sprite3D" parent="."]
+transform = Transform3D(-2.18557e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.18557e-08, -4.36667, 2.7, 0.548903)
+top_level = true
+texture = SubResource("ViewportTexture_at5dv")
+
+[node name="SubViewport" type="SubViewport" parent="Sprite3D2"]
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+
+[node name="Camera3D" type="Camera3D" parent="Sprite3D2/SubViewport"]
+transform = Transform3D(1.19249e-08, 0, -1, 0, 1, 0, 1, 0, 1.19249e-08, -3.89372, 2.292, 0)
