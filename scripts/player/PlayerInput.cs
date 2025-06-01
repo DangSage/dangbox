@@ -17,6 +17,11 @@ namespace DangboxGame.Scripts.Player {
 		public bool InteractPressed => _InteractPressed;
 
 		public override void _UnhandledInput(InputEvent @event) {
+			// Add safety check for disposed objects
+			if (!IsInstanceValid(this) || !IsInsideTree()) {
+				return;
+			}
+			
 			if (@event is InputEventMouseMotion mouseMotion) {
 				_mouseMovement = mouseMotion.Relative;
 			}
@@ -39,6 +44,11 @@ namespace DangboxGame.Scripts.Player {
 		}
 
 		public void ResetMouseMovement() {
+			// Add safety check
+			if (!IsInstanceValid(this)) {
+				return;
+			}
+			
 			_mouseMovement = Vector2.Zero;
 		}
 	}

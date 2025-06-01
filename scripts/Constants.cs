@@ -4,11 +4,11 @@ namespace DangboxGame.Scripts {
 	public static class Constants {
 		// Scene Paths
 		public static class ScenePath {
-			public const string Home = "res://scenes/Home.tscn";
 			public const string MainMenu = "res://scenes/ui/MainScreen.tscn";
-			public const string TestLevel = "res://assets/prefabs/playtest_level.tscn";
 			public const string SettingsMenu = "res://scenes/ui/SettingsMenu.tscn";
 			public const string PauseMenu = "res://scenes/ui/PauseMenu.tscn";
+			public const string TestLevel = "res://scenes/TestLevel.tscn";
+			public const string MainGameScene = "res://scenes/Main.tscn";
 		}
 
 		// Prefab Paths
@@ -21,12 +21,6 @@ namespace DangboxGame.Scripts {
 		// Script Paths
 		public static class ScriptPath {
 			public const string PlayerInput = "res://scripts/player/PlayerInput.cs";
-		}
-
-		// Save Paths
-		public static class SavePath {
-			public const string PlayerData = "user://player_data.nbt";
-			public const string GameSettings = "user://game_settings.cfg";
 		}
 	}
 }

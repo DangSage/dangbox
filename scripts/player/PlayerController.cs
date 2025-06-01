@@ -18,23 +18,46 @@ namespace DangboxGame.Scripts.Player {
 		private bool SprintPressed => _playerInput.SprintPressed;
 
 		public override void _Ready() {
-			Input.MouseMode = Input.MouseModeEnum.Captured;
-
-			_headTarget = GetNode<Node3D>("../_Camera/HeadTarget");
-			_cameraTarget = GetNode<Node3D>("../_Camera/HeadTarget/CameraTarget");
-			_actualHead = GetNode<Node3D>("../_Camera/ActualHead");
-			_playerInput = GetNode<PlayerInput>("../_PlayerInput");
+			// Use safer node access with null checks
+			_headTarget = GetNodeOrNull<Node3D>("../_Camera/HeadTarget");
+			_cameraTarget = GetNodeOrNull<Node3D>("../_Camera/HeadTarget/CameraTarget");
+			_actualHead = GetNodeOrNull<Node3D>("../_Camera/ActualHead");
+			_playerInput = GetNodeOrNull<PlayerInput>("../_PlayerInput");
+			
+			if (_headTarget == null || _cameraTarget == null || _actualHead == null || _playerInput == null) {
+				GD.PrintErr("PlayerController: Required nodes not found. Scene structure may be incorrect.");
+				return;
+			}
+			
+			ApplyFOVSetting();
+			GameEvents.SettingUpdated += OnSettingUpdated;
 		}
 
 		public override void _ExitTree() {
 			// WRITE NBT DATA TO FILE
 			var serial = _playerNbt.Serialize("/user://player_data.nbt");
 			Input.MouseMode = Input.MouseModeEnum.Visible; // Restore mouse mode on exit
+			
+			// Unsubscribe from static events
+			GameEvents.SettingUpdated -= OnSettingUpdated;
+			
 			base._ExitTree();
 		}
 
 
 		public override void _PhysicsProcess(double delta) {
+			// Add safety checks for disposed objects
+			if (!IsInstanceValid(this) || !IsInsideTree()) {
+				return;
+			}
+			
+			if (_actualHead == null || !IsInstanceValid(_actualHead) || 
+				_cameraTarget == null || !IsInstanceValid(_cameraTarget) ||
+				_headTarget == null || !IsInstanceValid(_headTarget) ||
+				_playerInput == null || !IsInstanceValid(_playerInput)) {
+				return;
+			}
+
 			_actualHead.Position = Position + new Vector3(0, 1.45f, 0);
 
 			HandleMouseMovement();
@@ -66,6 +89,13 @@ namespace DangboxGame.Scripts.Player {
 		}
 
 		private void HandleMouseMovement() {
+			// Add safety checks
+			if (_headTarget == null || !IsInstanceValid(_headTarget) ||
+				_cameraTarget == null || !IsInstanceValid(_cameraTarget) ||
+				_playerInput == null || !IsInstanceValid(_playerInput)) {
+				return;
+			}
+			
 			float sensitivity = _playerNbt.GetProperty<float>("sensitivity");
 			_headTarget.RotateY(-MouseMovement.X * sensitivity);
 			_cameraTarget.RotateX(-MouseMovement.Y * sensitivity);
@@ -95,6 +125,22 @@ namespace DangboxGame.Scripts.Player {
 					Velocity.Y - gravity * delta,
 					Mathf.Lerp(Velocity.Z, direction.Z * currentSpeed, acceleration * delta)
 				);
+			}
+		}
+
+		private void ApplyFOVSetting() {
+			if (GameSettings.Instance != null) {
+				float fov = GameSettings.Instance.GetFOV();
+				var camera = GetViewport().GetCamera3D();
+				if (camera != null) {
+					camera.Fov = fov;
+				}
+			}
+		}
+		
+		private void OnSettingUpdated(string settingName, Variant value) {
+			if (settingName == "graphics_fov") {
+				ApplyFOVSetting();
 			}
 		}
 	}

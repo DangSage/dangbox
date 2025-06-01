@@ -9,15 +9,31 @@ namespace DangboxGame.Scripts.Player {
 		private string _currentState = "";
 
 		public override void _Ready() {
-			_skeleton = GetNode<Skeleton3D>("./Skeleton3D");
+			_skeleton = GetNodeOrNull<Skeleton3D>("./Skeleton3D");
 			if (_skeleton == null) {
 				GD.PrintErr("Skeleton3D node not found!");
+				return;
 			}
-			_playerController = GetNode<PlayerController>("../../CharacterBody3D");
-			_animPlayer = GetNode<AnimationPlayer>("../AnimationPlayer");
+			_playerController = GetNodeOrNull<PlayerController>("../../CharacterBody3D");
+			_animPlayer = GetNodeOrNull<AnimationPlayer>("../AnimationPlayer");
+			
+			if (_playerController == null || _animPlayer == null) {
+				GD.PrintErr("PlayerAnimation: Required nodes not found. Scene structure may be incorrect.");
+			}
 		}
 
 		public override void _Process(double delta) {
+			// Add safety checks for disposed objects
+			if (!IsInstanceValid(this) || !IsInsideTree()) {
+				return;
+			}
+			
+			if (_playerController == null || !IsInstanceValid(_playerController) ||
+				_skeleton == null || !IsInstanceValid(_skeleton) ||
+				_animPlayer == null || !IsInstanceValid(_animPlayer)) {
+				return;
+			}
+
 			string activeModifier = _playerController.activeModifier;
 
 			PlayAnimation(activeModifier);
@@ -49,15 +65,24 @@ namespace DangboxGame.Scripts.Player {
 		}
 
 		private void UpdateHeadBone() {
+			// Add safety checks
+			if (_skeleton == null || !IsInstanceValid(_skeleton) ||
+				_playerController == null || !IsInstanceValid(_playerController)) {
+				return;
+			}
+			
 			int headIndex = _skeleton.FindBone("Head");
 			if (headIndex == -1) {
-				GD.PrintErr("Head bone not found in Skeleton3D!");
+				return; // Don't spam error messages
+			}
+
+			// Check if ActualHead node exists and is valid
+			var actualHead = _playerController.GetNodeOrNull<Node3D>("../ActualHead");
+			if (actualHead == null || !IsInstanceValid(actualHead)) {
 				return;
 			}
 
-			// TODO: headbone doesn't get updated (bad bone pose application? diff method?)
 			Transform3D animationPose = _skeleton.GetBonePose(headIndex);
-			Node3D actualHead = _playerController.GetNode<Node3D>("../ActualHead");
 			Quaternion headRotation = new Quaternion(Vector3.Right, actualHead.Rotation.X);
 
 			animationPose.Basis = animationPose.Basis.Slerp(new Basis(headRotation), 0.5f);
@@ -65,7 +90,18 @@ namespace DangboxGame.Scripts.Player {
 		}
 
 		private void RotateBody(float delta) {
-			float targetRotationY = _playerController.GetNode<Node3D>("../ActualHead").Rotation.Y;
+			// Add safety checks
+			if (_skeleton == null || !IsInstanceValid(_skeleton) ||
+				_playerController == null || !IsInstanceValid(_playerController)) {
+				return;
+			}
+			
+			var actualHead = _playerController.GetNodeOrNull<Node3D>("../ActualHead");
+			if (actualHead == null || !IsInstanceValid(actualHead)) {
+				return;
+			}
+			
+			float targetRotationY = actualHead.Rotation.Y;
 			float currentRotationY = _skeleton.Rotation.Y;
 			_skeleton.Rotation = new Vector3(
 				_skeleton.Rotation.X,

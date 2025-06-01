@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://fa6uaxtkbi0s"]
+[gd_scene load_steps=5 format=3 uid="uid://fa6uaxtkbi0s"]
 
 [ext_resource type="Material" uid="uid://dfxo64ecwact5" path="res://assets/materials/test.res" id="1_sv2be"]
 [ext_resource type="Material" uid="uid://crl1ca4sry2g4" path="res://assets/materials/player_character_sample.tres" id="2_id1dn"]
@@ -6,9 +6,6 @@
 [sub_resource type="BoxMesh" id="BoxMesh_lpvoh"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_at5dv"]
-
-[sub_resource type="ViewportTexture" id="ViewportTexture_at5dv"]
-viewport_path = NodePath("Objects/Sprite3D2/SubViewport")
 
 [node name="Objects" type="Node3D"]
 
@@ -47,15 +44,3 @@ mesh = SubResource("BoxMesh_lpvoh")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D2"]
 transform = Transform3D(1.02, 0, 0, 0, 1.02, 0, 0, 0, 1.02, 0, 0, 0)
 shape = SubResource("BoxShape3D_at5dv")
-
-[node name="Sprite3D2" type="Sprite3D" parent="."]
-transform = Transform3D(-2.18557e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.18557e-08, -4.36667, 2.7, 0.548903)
-top_level = true
-texture = SubResource("ViewportTexture_at5dv")
-
-[node name="SubViewport" type="SubViewport" parent="Sprite3D2"]
-handle_input_locally = false
-size = Vector2i(1920, 1080)
-
-[node name="Camera3D" type="Camera3D" parent="Sprite3D2/SubViewport"]
-transform = Transform3D(1.19249e-08, 0, -1, 0, 1, 0, 1, 0, 1.19249e-08, -3.89372, 2.292, 0)

@@ -1,24 +1,20 @@
-[gd_scene format=3 uid="uid://bhbaxt24doj4p"]
+[gd_scene load_steps=2 format=3 uid="uid://bhbaxt24doj4p"]
+
+[ext_resource type="Script" uid="uid://cxgvr7i7slytp" path="res://scripts/ui/PauseMenu.cs" id="1_vb6pq"]
 
 [node name="PauseMenu" type="Control"]
 process_mode = 3
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_vb6pq")
 
-[node name="ColorRect" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.129412)
-
-[node name="VerticalContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -32,21 +28,22 @@ offset_bottom = 53.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="button_resume" type="Button" parent="VerticalContainer"]
+[node name="ResumeButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Resume"
 
-[node name="button_settings" type="Button" parent="VerticalContainer"]
+[node name="SettingsButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Settings"
 
-[node name="button_exit" type="Button" parent="VerticalContainer"]
+[node name="MainMenuButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Exit to Main Menu"
 
-[connection signal="pressed" from="VerticalContainer/button_resume" to="." method="_onButtonResumePressed"]
-[connection signal="pressed" from="VerticalContainer/button_settings" to="." method="_onButtonSettingsPressed"]
-[connection signal="pressed" from="VerticalContainer/button_exit" to="." method="_onButtonExitPressed"]
+[node name="QuitButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Exit Game"

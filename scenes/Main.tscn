@@ -1,3 +1,49 @@
-[gd_scene format=3 uid="uid://cyuaa2akvxspv"]
+[gd_scene load_steps=6 format=3 uid="uid://dklm5hrqbj64a"]
+
+[ext_resource type="Sky" uid="uid://di2qmx4q408yu" path="res://assets/materials/default_sky.tres" id="1_fx3ca"]
+[ext_resource type="Material" uid="uid://dfxo64ecwact5" path="res://assets/materials/test.res" id="2_j3bqk"]
+
+[sub_resource type="Environment" id="Environment_errlg"]
+sky = ExtResource("1_fx3ca")
+ambient_light_source = 3
+ambient_light_color = Color(0.313726, 0.494118, 1, 1)
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.410832, 0.698094, 0.915888, 1)
+fog_light_energy = 1.15
+fog_sun_scatter = 0.35
+fog_density = 1.0
+volumetric_fog_density = 0.25
+adjustment_enabled = true
+adjustment_saturation = 0.81
+
+[sub_resource type="CameraAttributesPhysical" id="CameraAttributesPhysical_bl13t"]
+
+[sub_resource type="Compositor" id="Compositor_iyx0m"]
 
 [node name="Node" type="Node"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_errlg")
+camera_attributes = SubResource("CameraAttributesPhysical_bl13t")
+compositor = SubResource("Compositor_iyx0m")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0.707107, -0.5, 0.5, 0, 0.0368419, 0)
+shadow_enabled = true
+shadow_transmittance_bias = 0.295
+shadow_opacity = 0.45
+shadow_blur = 10.0
+directional_shadow_mode = 0
+directional_shadow_fade_start = 0.79
+
+[node name="Objects" type="Node3D" parent="."]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.496765, 0)
+material_override = ExtResource("2_j3bqk")
+gi_lightmap_texel_scale = 1.6101
+use_collision = true
+
+[node name="PlayerSpawn" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)

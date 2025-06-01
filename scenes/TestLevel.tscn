@@ -1,14 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://b2u1epj852pwp"]
+[gd_scene load_steps=10 format=3 uid="uid://b2u1epj852pwp"]
 
-[ext_resource type="Sky" uid="uid://di2qmx4q408yu" path="res://assets/materials/default_sky.tres" id="1_74lek"]
-[ext_resource type="Material" uid="uid://dfxo64ecwact5" path="res://assets/materials/test.res" id="1_iyx0m"]
-[ext_resource type="PackedScene" uid="uid://t0h5ffi75t2n" path="res://assets/prefabs/_camera.tscn" id="4_at5dv"]
-[ext_resource type="Material" uid="uid://crl1ca4sry2g4" path="res://assets/materials/player_character_sample.tres" id="6_lpvoh"]
-[ext_resource type="Script" uid="uid://c2ddj6kh3h3hm" path="res://scripts/player/PlayerInput.cs" id="7_at5dv"]
-[ext_resource type="PackedScene" uid="uid://un1m2pap326e" path="res://assets/prefabs/character_body_3d.tscn" id="7_jcd4p"]
+[ext_resource type="Sky" uid="uid://di2qmx4q408yu" path="res://assets/materials/default_sky.tres" id="1_5n3yh"]
+[ext_resource type="Material" uid="uid://dfxo64ecwact5" path="res://assets/materials/test.res" id="4_6e24c"]
+[ext_resource type="Material" uid="uid://crl1ca4sry2g4" path="res://assets/materials/player_character_sample.tres" id="5_5ycvo"]
 
 [sub_resource type="Environment" id="Environment_errlg"]
-sky = ExtResource("1_74lek")
+sky = ExtResource("1_5n3yh")
 ambient_light_source = 3
 ambient_light_color = Color(0.313726, 0.494118, 1, 1)
 fog_enabled = true
@@ -48,30 +45,25 @@ shadow_blur = 10.0
 directional_shadow_mode = 0
 directional_shadow_fade_start = 0.79
 
-[node name="_PlayerInput" type="Node" parent="."]
-script = ExtResource("7_at5dv")
-
-[node name="_Camera" parent="." instance=ExtResource("4_at5dv")]
-
 [node name="Objects" type="Node3D" parent="."]
 
 [node name="CSGBox3D" type="CSGBox3D" parent="Objects"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.496765, 0)
-material_override = ExtResource("1_iyx0m")
+material_override = ExtResource("4_6e24c")
 gi_lightmap_texel_scale = 1.6101
 use_collision = true
 size = Vector3(100, 1, 100)
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="Objects"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.47116, -2.59946, 0)
-material_override = ExtResource("1_iyx0m")
+material_override = ExtResource("4_6e24c")
 gi_lightmap_texel_scale = 1.6101
 use_collision = true
 size = Vector3(6.94824, 7.2497, 9.01709)
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="Objects"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.8695, -1.61309, 5.64637)
-material_override = ExtResource("1_iyx0m")
+material_override = ExtResource("4_6e24c")
 gi_lightmap_texel_scale = 1.6101
 use_collision = true
 size = Vector3(3.22949, 6.75047, 2.13611)
@@ -84,7 +76,7 @@ linear_damp_mode = 1
 angular_damp_mode = 1
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Objects/RigidBody3D2"]
-material_override = ExtResource("6_lpvoh")
+material_override = ExtResource("5_5ycvo")
 mesh = SubResource("BoxMesh_lpvoh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Objects/RigidBody3D2"]
@@ -102,5 +94,3 @@ size = Vector2i(1920, 1080)
 
 [node name="Camera3D" type="Camera3D" parent="Objects/Sprite3D2/SubViewport"]
 transform = Transform3D(1.19249e-08, 0, -1, 0, 1, 0, 1, 0, 1.19249e-08, -3.89372, 2.292, 0)
-
-[node name="CharacterBody3D" parent="." instance=ExtResource("7_jcd4p")]
