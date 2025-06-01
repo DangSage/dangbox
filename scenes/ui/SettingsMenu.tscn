@@ -38,13 +38,12 @@ grow_vertical = 2
 size_flags_horizontal = 6
 size_flags_vertical = 6
 
-[node name="ProgressBar_FOV" type="ProgressBar" parent="VerticalContainer"]
+[node name="ProgressBar_FOV" type="HSlider" parent="VerticalContainer"]
 custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
 max_value = 120.0
 value = 90.0
 rounded = true
-show_percentage = false
 
 [node name="RichTextLabel" type="RichTextLabel" parent="VerticalContainer/ProgressBar_FOV"]
 custom_minimum_size = Vector2(0, 25)

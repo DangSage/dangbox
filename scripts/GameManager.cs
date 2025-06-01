@@ -7,6 +7,8 @@ using DangboxGame.Scripts.UI;
 
 namespace DangboxGame.Scripts {
 	public partial class GameManager : Node {
+		public static GameManager Instance { get; private set; }
+
 		private Node _currentScene;
 		private Node _playerInstance;
 		private Node _cameraInstance;
@@ -15,13 +17,25 @@ namespace DangboxGame.Scripts {
 		private readonly Dictionary<string, bool> _resourceVerification = [];
 
 		public override void _Ready() {
+			if (Instance != null) {
+				QueueFree();
+				return;
+			}
+			Instance = this;
+
 			VerifyResources();
 
 			// Ensure UIManager is added first
-			var uiManager = new UIManager();
-			AddChild(uiManager);
+			var uiManager = UIManager.Instance;
+			if (uiManager != null) {
+				AddChild(uiManager);
+			} else {
+				GD.PrintErr("Failed to load UIManager scene.");
+				return;
+			}
 
-			UIManager.Instance.ShowMainMenu();
+			// Initialize UIManager and connect signals
+			UIManager.Instance.ChangeUIState(UIManager.UIState.MainMenu);
 			ConnectUISignals();
 		}
 
@@ -62,11 +76,14 @@ namespace DangboxGame.Scripts {
 		}
 
 		private void DelayedConnectSignals() {
-			var mainScreenUI = UIManager.Instance.GetMainMenu();
-			if (mainScreenUI != null) {
-				mainScreenUI.Connect("play_host_pressed", Callable.From(OnPlayHostPressed));
-				mainScreenUI.Connect("play_connect_pressed", Callable.From(OnPlayConnectPressed));
-				mainScreenUI.Connect("settings_pressed", Callable.From(OnSettingsPressed));
+			var mainMenu = UIManager.Instance.GetCurrentState() == UIManager.UIState.MainMenu
+				? UIManager.Instance.GetNodeOrNull<MainMenu>("MenuLayer/MainMenu")
+				: null;
+
+			if (mainMenu != null) {
+				mainMenu.GetNode<Button>("StartButton").Connect("pressed", Callable.From(StartHostGame));
+				mainMenu.GetNode<Button>("SettingsButton").Connect("pressed", Callable.From(OnSettingsPressed));
+				mainMenu.GetNode<Button>("QuitButton").Connect("pressed", Callable.From(OnQuitButtonPressed));
 			} else {
 				GD.PrintErr("Failed to connect UI signals: Main menu not found");
 			}
@@ -94,15 +111,8 @@ namespace DangboxGame.Scripts {
 			}
 		}
 
-		private void OnPlayHostPressed() {
-			// Hide main menu and show HUD
-			UIManager.Instance.HideMenu();
-			UIManager.Instance.ShowHUD();
-
-			// Load game scene
+		public void StartHostGame() {
 			LoadScene(Constants.ScenePath.TestLevel);
-
-			// Create player and required components
 			SetupPlayer();
 		}
 
@@ -134,14 +144,12 @@ namespace DangboxGame.Scripts {
 			}
 		}
 
-		private void OnPlayConnectPressed() {
-			GD.Print("Play Connect button pressed. Implement functionality here.");
-			// Add functionality for connecting to a multiplayer session.
+		private void OnSettingsPressed() {
+			UIManager.Instance.ChangeUIState(UIManager.UIState.SettingsMenu);
 		}
 
-		private void OnSettingsPressed() {
-			GD.Print("Settings button pressed");
-			UIManager.Instance.ShowSettingsMenu();
+		private void OnQuitButtonPressed() {
+			GetTree().Quit();
 		}
 
 		private Node InstantiateNode(string resourcePath) {

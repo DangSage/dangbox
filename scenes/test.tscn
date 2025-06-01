@@ -1,9 +1,7 @@
-[gd_scene load_steps=15 format=3 uid="uid://b2u1epj852pwp"]
+[gd_scene load_steps=13 format=3 uid="uid://b2u1epj852pwp"]
 
 [ext_resource type="Sky" uid="uid://di2qmx4q408yu" path="res://assets/materials/default_sky.tres" id="1_74lek"]
 [ext_resource type="Material" uid="uid://dfxo64ecwact5" path="res://assets/materials/test.res" id="1_iyx0m"]
-[ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="2_jcd4p"]
-[ext_resource type="Theme" uid="uid://bgn7t6gvqmjdb" path="res://scenes/ui/dangui_theme.tres" id="3_jcd4p"]
 [ext_resource type="PackedScene" uid="uid://t0h5ffi75t2n" path="res://assets/prefabs/_camera.tscn" id="4_at5dv"]
 [ext_resource type="Material" uid="uid://crl1ca4sry2g4" path="res://assets/materials/player_character_sample.tres" id="6_lpvoh"]
 [ext_resource type="Script" uid="uid://c2ddj6kh3h3hm" path="res://scripts/player/PlayerInput.cs" id="7_at5dv"]
@@ -49,130 +47,6 @@ shadow_opacity = 0.45
 shadow_blur = 10.0
 directional_shadow_mode = 0
 directional_shadow_fade_start = 0.79
-
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-script = ExtResource("2_jcd4p")
-
-[node name="PauseMenu" type="Control" parent="CanvasLayer"]
-process_mode = 3
-visible = false
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer/PauseMenu"]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.129412)
-
-[node name="VerticalContainer" type="VBoxContainer" parent="CanvasLayer/PauseMenu"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -87.0
-offset_top = -53.0
-offset_right = 87.0
-offset_bottom = 53.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="button_resume" type="Button" parent="CanvasLayer/PauseMenu/VerticalContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "Resume"
-
-[node name="button_settings" type="Button" parent="CanvasLayer/PauseMenu/VerticalContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "Settings"
-
-[node name="button_exit" type="Button" parent="CanvasLayer/PauseMenu/VerticalContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "Exit to Main Menu"
-
-[node name="SettingsMenu" type="Control" parent="CanvasLayer"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-theme = ExtResource("3_jcd4p")
-
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer/SettingsMenu"]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.129412)
-
-[node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/SettingsMenu"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.326389
-anchor_top = 0.0617284
-anchor_right = 0.666667
-anchor_bottom = 0.938272
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/SettingsMenu/ScrollContainer"]
-layout_mode = 2
-
-[node name="CheckBox" type="CheckBox" parent="CanvasLayer/SettingsMenu/ScrollContainer/VBoxContainer"]
-layout_mode = 2
-text = "dfgfgfgdfgdgdg"
-
-[node name="Panel" type="Panel" parent="CanvasLayer/SettingsMenu"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.305556
-anchor_top = 0.0246914
-anchor_right = 0.694444
-anchor_bottom = 0.976852
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="PopupPanel" type="PopupPanel" parent="CanvasLayer/SettingsMenu"]
-title = "Tooltip"
-visible = true
-keep_title_visible = true
-content_scale_mode = 2
-content_scale_aspect = 4
-
-[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/SettingsMenu/PopupPanel"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 96.0
-offset_bottom = 96.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-text = "This is a good example of a tooltip"
-fit_content = true
 
 [node name="_PlayerInput" type="Node" parent="."]
 script = ExtResource("7_at5dv")
@@ -230,7 +104,3 @@ size = Vector2i(1920, 1080)
 transform = Transform3D(1.19249e-08, 0, -1, 0, 1, 0, 1, 0, 1.19249e-08, -3.89372, 2.292, 0)
 
 [node name="CharacterBody3D" parent="." instance=ExtResource("7_jcd4p")]
-
-[connection signal="pressed" from="CanvasLayer/PauseMenu/VerticalContainer/button_resume" to="CanvasLayer/PauseMenu" method="_onButtonResumePressed"]
-[connection signal="pressed" from="CanvasLayer/PauseMenu/VerticalContainer/button_settings" to="CanvasLayer/PauseMenu" method="_onButtonSettingsPressed"]
-[connection signal="pressed" from="CanvasLayer/PauseMenu/VerticalContainer/button_exit" to="CanvasLayer/PauseMenu" method="_onButtonExitPressed"]

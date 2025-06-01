@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://cyvo4akylmtuh"]
+[gd_scene load_steps=3 format=3 uid="uid://cyvo4akylmtuh"]
 
+[ext_resource type="Script" uid="uid://dqwhrwmi1fhhn" path="res://scripts/ui/MainMenu.cs" id="1_lqsbq"]
 [ext_resource type="FontFile" uid="uid://b1rfo27mefj6b" path="res://assets/fonts/HEXAGON_.TTF" id="2_bxvkp"]
 
 [node name="MainScreen" type="Control"]
@@ -9,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_lqsbq")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
@@ -30,22 +32,22 @@ anchor_bottom = 0.947531
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="play_host" type="Button" parent="VerticalContainer"]
+[node name="StartButton" type="Button" parent="VerticalContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Host World"
 
-[node name="play_connect" type="Button" parent="VerticalContainer"]
+[node name="MpButton" type="Button" parent="VerticalContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Multiplayer"
 
-[node name="settings" type="Button" parent="VerticalContainer"]
+[node name="SettingsButton" type="Button" parent="VerticalContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Settings"
 
-[node name="quit" type="Button" parent="VerticalContainer"]
+[node name="QuitButton" type="Button" parent="VerticalContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Quit Game"
