@@ -15,9 +15,17 @@ run/main_scene="res://scenes/ui/MainScreen.tscn"
 config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+GameManager="*res://scripts/GameManager.cs"
+
 [dotnet]
 
 project/assembly_name="dangbox-game"
+
+[editor]
+
+version_control/autoload_on_startup=true
 
 [editor_plugins]
 
