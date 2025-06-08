@@ -33,17 +33,6 @@ namespace DangboxGame.Scripts.Player {
 		}
 
 		public override void _Process(double delta) {
-			// Add safety checks for disposed objects
-			if (!IsInstanceValid(this) || !IsInsideTree()) {
-				return;
-			}
-
-			if (_playerController == null || !IsInstanceValid(_playerController) ||
-				_skeleton == null || !IsInstanceValid(_skeleton) ||
-				_animPlayer == null || !IsInstanceValid(_animPlayer)) {
-				return;
-			}
-
 			string activeModifier = _playerController.activeModifier;
 
 			PlayAnimation(activeModifier);
@@ -79,35 +68,31 @@ namespace DangboxGame.Scripts.Player {
 		}
 
 		private void UpdateHeadBone() {
-			// Add safety checks
 			if (_skeleton == null || !IsInstanceValid(_skeleton) ||
 				_playerController == null || !IsInstanceValid(_playerController) ||
 				actualHead == null || !IsInstanceValid(actualHead)) {
 				return;
 			}
 
-			// Instead of setting the bone pose, use SetBoneGlobalPoseOverride for runtime control
-			Transform3D headGlobalTransform = actualHead.GlobalTransform;
-			Basis headBasis = headGlobalTransform.Basis;
-			Vector3 headEuler = headBasis.GetEuler();
-			// Only apply X (pitch) rotation, keep other axes unchanged
 			int headIndex = _skeleton.FindBone("Head");
-			Transform3D boneGlobalTransform = _skeleton.GetBoneGlobalPose(headIndex);
+			if (headIndex == -1) {
+				GD.PrintErr("Head bone not found in skeleton");
+				return;
+			}
 
-			Basis newBasis = boneGlobalTransform.Basis;
-			Vector3 boneEuler = newBasis.GetEuler();
-			boneEuler.X = headEuler.X; // Only set X rotation
-			newBasis = Basis.FromEuler(boneEuler);
+			// Get the head's pitch rotation
+			Vector3 headRotation = actualHead.Rotation;
 
-			Transform3D newTransform = boneGlobalTransform;
-			newTransform.Basis = newBasis;
+			// Use global pose override to work with animations
+			Transform3D currentGlobalPose = _skeleton.GetBoneGlobalPose(headIndex);
 
-			_skeleton.SetBoneGlobalPoseOverride(
-				headIndex,
-				newTransform,
-				1.0f, // full weight
-				true  // persistent
-			);
+			Vector3 currentEuler = currentGlobalPose.Basis.GetEuler();
+			currentEuler.X = headRotation.X;
+			
+			Transform3D newGlobalPose = currentGlobalPose;
+			newGlobalPose.Basis = Basis.FromEuler(currentEuler);
+
+			_skeleton.SetBonePoseRotation(headIndex, newGlobalPose.Basis.GetRotationQuaternion());
 		}
 
 		private void RotateBody(float delta) {
