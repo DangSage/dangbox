@@ -144,5 +144,7 @@ renderer/rendering_method.mobile="gl_compatibility"
 environment/ssao/quality=0
 anti_aliasing/screen_space_roughness_limiter/enabled=false
 environment/glow/upscale_mode=0
+global_illumination/sdfgi/frames_to_converge=0
 viewport/transparent_background=true
+2d/snap/snap_2d_transforms_to_pixel=true
 environment/defaults/default_environment="uid://cl4jo5dnisv50"
