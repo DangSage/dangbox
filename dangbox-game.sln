@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dangbox Game", "Dangbox Game.csproj", "{9B1CEC32-5792-4C62-B7E1-7EFF2A5E838B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dangbox-game", "dangbox-game.csproj", "{2EECCF50-5C6E-4FD6-9171-50A9C7ACE488}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,11 +9,11 @@ Global
 	ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9B1CEC32-5792-4C62-B7E1-7EFF2A5E838B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9B1CEC32-5792-4C62-B7E1-7EFF2A5E838B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9B1CEC32-5792-4C62-B7E1-7EFF2A5E838B}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{9B1CEC32-5792-4C62-B7E1-7EFF2A5E838B}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{9B1CEC32-5792-4C62-B7E1-7EFF2A5E838B}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{9B1CEC32-5792-4C62-B7E1-7EFF2A5E838B}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{2EECCF50-5C6E-4FD6-9171-50A9C7ACE488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EECCF50-5C6E-4FD6-9171-50A9C7ACE488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EECCF50-5C6E-4FD6-9171-50A9C7ACE488}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{2EECCF50-5C6E-4FD6-9171-50A9C7ACE488}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{2EECCF50-5C6E-4FD6-9171-50A9C7ACE488}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{2EECCF50-5C6E-4FD6-9171-50A9C7ACE488}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
 	EndGlobalSection
 EndGlobal
