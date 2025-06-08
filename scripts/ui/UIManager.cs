@@ -60,6 +60,12 @@ namespace DangboxGame.Scripts.UI {
 			ProcessMode = ProcessModeEnum.Always;
 			Layer = 100;
 			
+			var root = GetTree().Root;
+			if (GetParent() != root) {
+				GetParent()?.RemoveChild(this);
+				root.AddChild(this);
+			}
+			
 			// Create and add background elements as children
 			_mainBG = CreateFullRectBackground(new Color(0.25f, 0.25f, 0.25f, 1.0f));
 			_mainBG.Name = "MainBG";
@@ -84,7 +90,7 @@ namespace DangboxGame.Scripts.UI {
 		}
 
 		public override void _Input(InputEvent @event) {
-			if (@event.IsActionPressed("ui_cancel")) {
+			if (@event is InputEventKey keyEvent && keyEvent.IsActionPressed("ui_cancel")) {
 				HandleEscapeKey();
 			}
 		}
@@ -99,12 +105,10 @@ namespace DangboxGame.Scripts.UI {
 						ChangeUIState(UIState.MainMenu);
 					}
 					break;
-				case UIState.HUD:
-					// Use events instead of direct method call
+				case UIState.HUD:   // In-game, whether in a interaction or not
 					GameEvents.EmitGamePauseRequested();
 					break;
 				case UIState.PauseMenu:
-					// Use events instead of direct method call
 					GameEvents.EmitGameResumeRequested();
 					break;
 			}
@@ -175,10 +179,6 @@ namespace DangboxGame.Scripts.UI {
 			if (newState != UIState.None) {
 				ShowUI(newState);
 			}
-
-			// // print the current scenetree
-			// PrintTreePretty();
-			// GD.Print($"UI State changed to: {newState}");
 
 			HandlePauseState(newState);
 			UpdateBackgroundVisibility();
@@ -255,14 +255,12 @@ namespace DangboxGame.Scripts.UI {
 					_isPaused = true;
 					GetTree().Paused = true;
 					Input.MouseMode = Input.MouseModeEnum.Visible;
-					GameEvents.EmitGamePaused();
 					break;
 				case UIState.HUD:
 					if (_isPaused) {
 						_isPaused = false;
 						GetTree().Paused = false;
 						Input.MouseMode = Input.MouseModeEnum.Captured;
-						GameEvents.EmitGameResumed();
 					}
 					break;
 				case UIState.MainMenu:
@@ -271,7 +269,6 @@ namespace DangboxGame.Scripts.UI {
 					if (_isPaused) {
 						_isPaused = false;
 						GetTree().Paused = false;
-						GameEvents.EmitGameResumed();
 					}
 					Input.MouseMode = Input.MouseModeEnum.Visible;
 					break;
@@ -326,9 +323,9 @@ namespace DangboxGame.Scripts.UI {
 		}
 
 		private void UpdateOpacityBackground() {
-			if (_opacityBG == null || GameSettings.Instance == null) return;
+			if (_opacityBG == null || GameManager.Instance?.Settings == null) return;
 
-			float opacity = GameSettings.Instance.GetMenuOpacity();
+			float opacity = GameManager.Instance.Settings.GetMenuOpacity();
 			Color currentColor = _opacityBG.Color;
 			_opacityBG.Color = new Color(currentColor.R, currentColor.G, currentColor.B, opacity);
 		}

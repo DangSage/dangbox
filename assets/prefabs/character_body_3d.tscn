@@ -1,8 +1,10 @@
-[gd_scene load_steps=15 format=4 uid="uid://un1m2pap326e"]
+[gd_scene load_steps=17 format=4 uid="uid://un1m2pap326e"]
 
 [ext_resource type="Script" uid="uid://x1ykfx84lqv1" path="res://scripts/player/PlayerController.cs" id="1_wufoi"]
 [ext_resource type="Script" uid="uid://co4sg3qsh467d" path="res://scripts/player/PlayerAnimation.cs" id="2_re6ju"]
 [ext_resource type="Material" uid="uid://crl1ca4sry2g4" path="res://assets/materials/player_character_sample.tres" id="3_y4egk"]
+[ext_resource type="PackedScene" uid="uid://t0h5ffi75t2n" path="res://assets/prefabs/_camera.tscn" id="4_re6ju"]
+[ext_resource type="Script" uid="uid://c2ddj6kh3h3hm" path="res://scripts/player/PlayerInput.cs" id="5_y4egk"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_rpdcm"]
 radius = 2.585
@@ -530,6 +532,11 @@ _data = {
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 collision_mask = 3
 script = ExtResource("1_wufoi")
+
+[node name="_Camera" parent="." instance=ExtResource("4_re6ju")]
+
+[node name="_PlayerInput" type="Node" parent="."]
+script = ExtResource("5_y4egk")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0148111, 8.23975, -0.0277966)

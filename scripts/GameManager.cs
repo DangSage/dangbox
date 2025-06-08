@@ -4,11 +4,15 @@
 using Godot;
 using System.Collections.Generic;
 using DangboxGame.Scripts.UI;
+using DangboxGame.Scripts.Core.Environment;
 using System;
 
 namespace DangboxGame.Scripts {
 	public partial class GameManager : Node {
 		public static GameManager Instance { get; private set; }
+		
+		public GameSettings Settings { get; private set; }
+		public Player.PlayerManager PlayerManager { get; private set; }
 
 		public enum GameState {
 			MainMenu,
@@ -27,20 +31,18 @@ namespace DangboxGame.Scripts {
 			Instance = this;
 			ProcessMode = ProcessModeEnum.Always;
 			
-			// Subscribe to static events
-			GameEvents.SceneLoaded += OnSceneLoaded;
-			GameEvents.GameStarted += OnGameStarted;
-			GameEvents.GamePaused += OnGamePaused;
-			GameEvents.GameResumed += OnGameResumed;
+			Settings = new GameSettings();
+			AddChild(Settings);
 			
-			// Subscribe to new game control events
 			GameEvents.GameStartRequested += OnGameStartRequested;
+			GameEvents.SceneLoaded += OnSceneLoaded;
+			GameEvents.ManagersReady += OnManagersReady;
+			GameEvents.SpawnPointsReady += OnSpawnPointsReady;
+			GameEvents.GameSessionReady += OnGameSessionReady;
 			GameEvents.GamePauseRequested += OnGamePauseRequested;
 			GameEvents.GameResumeRequested += OnGameResumeRequested;
 			GameEvents.MainMenuRequested += OnMainMenuRequested;
 			GameEvents.QuitGameRequested += OnQuitGameRequested;
-			
-			GD.Print("GameManager initialized");
 		}
 
 		public void InitializeGameState(GameState targetState = GameState.MainMenu) {
@@ -54,8 +56,6 @@ namespace DangboxGame.Scripts {
 					StartGameSession();
 					break;
 			}
-
-			GD.Print($"Game state initialized to: {targetState}");
 		}
 
 		private void ShowMainMenu() {
@@ -65,11 +65,9 @@ namespace DangboxGame.Scripts {
 
 		public void StartGameSession() {
 			_currentState = GameState.Loading;
-			CleanupCurrentScene();
 			
 			GameEvents.EmitUIStateChanged("hud");
 			
-			// Use SceneService to load the game scene
 			string scenePath = Constants.ScenePath.MainGameScene;
 			if (!ResourceLoader.Exists(scenePath)) {
 				GD.PrintErr($"Main game scene not found: {scenePath}");
@@ -84,92 +82,194 @@ namespace DangboxGame.Scripts {
 			SceneService.Instance?.LoadScene(scenePath);
 		}
 
-		// New method: Join the game as a player (singleplayer or multiplayer)
 		public void JoinGame() {
 			if (_currentState != GameState.InGame) {
 				GD.PrintErr("Cannot join game: Game is not in InGame state");
 				return;
 			}
 
-			// Spawn local player with temporary coordinates
 			Vector3 spawnPosition = new(0, 5, 0);
 			GameEvents.EmitPlayerSpawnRequested(0, spawnPosition, Vector3.Zero);
-			
-			// Set mouse capture for gameplay
-			Input.MouseMode = Input.MouseModeEnum.Captured;
 		}
 
-		private static void CleanupCurrentScene() {
-			// Clean up all players when changing scenes
-			Player.PlayerManager.Instance?.DespawnAllPlayers();
+		private void OnGameStartRequested() {
+			_currentState = GameState.Loading;
+			GameEvents.EmitUIStateChanged("hud");
+			
+			string scenePath = Constants.ScenePath.MainGameScene;
+			if (!ResourceLoader.Exists(scenePath)) {
+				GD.PrintErr($"Main game scene not found: {scenePath}");
+				scenePath = Constants.ScenePath.TestLevel;
+				if (!ResourceLoader.Exists(scenePath)) {
+					GD.PrintErr($"Test level scene not found: {scenePath}");
+					ShowMainMenu();
+					return;
+				}
+			}
+			
+			SceneService.Instance?.LoadScene(scenePath);
 		}
 
 		private void OnSceneLoaded(Node scene) {
 			if (scene == null) {
 				GD.PrintErr("Scene loaded event received with null scene");
-				GD.PrintErr(System.Environment.StackTrace);
-				throw new ArgumentNullException(nameof(scene), "Scene cannot be null");
+				ShowMainMenu();
+				return;
 			}
 
-			GD.Print("Game scene loaded - ready for players to join");
-
-			if (_currentState == GameState.Loading) {
-				_currentState = GameState.InGame;
-				GameEvents.EmitGameStarted();
-				GD.Print("Game state set to InGame after scene load");
+			GD.Print("Scene loaded successfully, creating PlayerManager...");
+			
+			if (scene.Name == "Node" || scene.GetType().Name == "Node") {
+				CreatePlayerManager();
+			}
+			
+			if (ValidateManagersReady()) {
+				GameEvents.EmitManagersReady();
+			} else {
+				GD.PrintErr("Managers not ready after scene load");
+				ShowMainMenu();
 			}
 		}
 
-		private void OnGameStarted() {
-			if (_currentState != GameState.InGame) {
-				_currentState = GameState.InGame;
-				GD.Print("Game state set to InGame");
+		private void CreatePlayerManager() {
+			if (PlayerManager != null && IsInstanceValid(PlayerManager)) {
+				PlayerManager.QueueFree();
+				PlayerManager = null;
 			}
 
-			JoinGame();
+			PlayerManager = new Player.PlayerManager();
+			PlayerManager.Name = "PlayerManager";
+			AddChild(PlayerManager);
+			
+			GD.Print("PlayerManager created as child of GameManager");
 		}
 
-		private void OnGamePaused() {
-			_currentState = GameState.Paused;
+		private void CleanupPlayerManager() {
+			if (PlayerManager != null && IsInstanceValid(PlayerManager)) {
+				PlayerManager.QueueFree();
+				PlayerManager = null;
+				GD.Print("PlayerManager cleaned up");
+			}
 		}
 
-		private void OnGameResumed() {
+		private void OnManagersReady() {
+			GD.Print("Managers ready, validating spawn points...");
+			
+			if (ValidateSpawnPointsReady()) {
+				GameEvents.EmitSpawnPointsReady();
+			} else {
+				GD.PrintErr("Spawn points not ready");
+				ShowMainMenu();
+			}
+		}
+
+		private void OnSpawnPointsReady() {
+			GD.Print("Spawn points ready, game session is ready");
+			GameEvents.EmitGameSessionReady();
+		}
+
+		private void OnGameSessionReady() {
 			_currentState = GameState.InGame;
+			GD.Print("Game session ready - starting player spawn");
+			
+			if (!ValidateManagersReady()) {
+				GD.PrintErr("Managers became invalid just before player spawn!");
+				ShowMainMenu();
+				return;
+			}
+			
+			Vector3 spawnPosition = GetSpawnPosition();
+			GameEvents.EmitPlayerSpawnRequested(0, spawnPosition, Vector3.Zero);
 		}
 
-		private void OnGameStartRequested() {
-			StartGameSession();
+		private bool ValidateManagersReady() {
+			bool sceneServiceReady = SceneService.Instance != null && 
+									IsInstanceValid(SceneService.Instance) && 
+									SceneService.Instance.IsInsideTree();
+			if (!sceneServiceReady) {
+				GD.PrintErr($"SceneService validation failed");
+			}
+			
+			bool playerManagerReady = true;
+			var currentScene = SceneService.Instance?.GetCurrentScene();
+			if (currentScene != null && (currentScene.Name == "Node" || currentScene.GetType().Name == "Node")) {
+				playerManagerReady = PlayerManager != null &&
+									IsInstanceValid(PlayerManager) &&
+									PlayerManager.IsInsideTree();
+				if (!playerManagerReady) {
+					GD.PrintErr($"PlayerManager validation failed");
+				}
+			}
+			
+			bool gameSettingsReady = Settings != null && IsInstanceValid(Settings);
+			if (!gameSettingsReady) {
+				GD.PrintErr($"GameSettings validation failed");
+			}
+			
+			bool uiManagerReady = UIManager.Instance != null &&
+								 IsInstanceValid(UIManager.Instance) &&
+								 UIManager.Instance.IsInsideTree();
+			if (!uiManagerReady) {
+				GD.PrintErr($"UIManager validation failed");
+			}
+
+			return sceneServiceReady && playerManagerReady && gameSettingsReady && uiManagerReady;
+		}
+
+		private bool ValidateSpawnPointsReady() {
+			var currentScene = SceneService.Instance?.GetCurrentScene();
+			if (currentScene == null || !IsInstanceValid(currentScene)) {
+				return false;
+			}
+
+			var spawnPoint = currentScene.GetNodeOrNull<Node3D>("PlayerSpawn");
+			return spawnPoint != null && IsInstanceValid(spawnPoint);
+		}
+
+		private Vector3 GetSpawnPosition() {
+			var currentScene = SceneService.Instance?.GetCurrentScene();
+			if (currentScene != null) {
+				var spawnPoint = currentScene.GetNodeOrNull<Node3D>("PlayerSpawn");
+				if (spawnPoint != null) {
+					return spawnPoint.GlobalPosition;
+				}
+			}
+			return new Vector3(0, 5, 0);
 		}
 
 		private void OnGamePauseRequested() {
 			if (_currentState == GameState.InGame) {
+				_currentState = GameState.Paused;
 				UIManager.Instance?.ChangeUIState(UIManager.UIState.PauseMenu);
 			}
 		}
 
 		private void OnGameResumeRequested() {
 			if (_currentState == GameState.Paused) {
+				_currentState = GameState.InGame;
 				UIManager.Instance?.ChangeUIState(UIManager.UIState.HUD);
 			}
 		}
 
 		private void OnMainMenuRequested() {
-			// Clean up and return to main menu
-			CleanupCurrentScene();
+			CleanupPlayerManager();
 			UIManager.Instance?.RestartToStartMenu();
 		}
 
 		private void OnQuitGameRequested() {
+			CleanupPlayerManager();
+			Settings?.SaveSettings();
+			EnvironmentPaths.WriteLog("shutdown", $"Game shutdown at {System.DateTime.Now}");
+			GD.Print("Quitting game...");
 			GetTree().Quit();
 		}
 
 		public override void _ExitTree() {
-			// Unsubscribe from events
-			GameEvents.SceneLoaded -= OnSceneLoaded;
-			GameEvents.GameStarted -= OnGameStarted;
-			GameEvents.GamePaused -= OnGamePaused;
-			GameEvents.GameResumed -= OnGameResumed;
 			GameEvents.GameStartRequested -= OnGameStartRequested;
+			GameEvents.SceneLoaded -= OnSceneLoaded;
+			GameEvents.ManagersReady -= OnManagersReady;
+			GameEvents.SpawnPointsReady -= OnSpawnPointsReady;
+			GameEvents.GameSessionReady -= OnGameSessionReady;
 			GameEvents.GamePauseRequested -= OnGamePauseRequested;
 			GameEvents.GameResumeRequested -= OnGameResumeRequested;
 			GameEvents.MainMenuRequested -= OnMainMenuRequested;

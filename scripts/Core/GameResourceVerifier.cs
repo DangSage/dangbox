@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using DangboxGame.Scripts.UI;
+using DangboxGame.Scripts.Core.Environment;
 
 namespace DangboxGame.Scripts {
 	public partial class GameResourceVerifier : Node {
@@ -27,13 +28,23 @@ namespace DangboxGame.Scripts {
 
 			_isVerifying = true;
 			_verificationProgress = 0f;
-			_loadingScreen?.StartLoading("Verifying resources...");
+			_loadingScreen?.StartLoading("Initializing environment...");
 
 			VerifyResources();
 		}
 
 		private async void VerifyResources() {
 			try {
+				// First, wait for EnvironmentConfig to be ready
+				await WaitForEnvironmentConfig();
+				
+				_loadingScreen?.UpdateProgress(0.1f, "Environment configuration loaded");
+				
+				// Verify EnvironmentConfig is working properly
+				VerifyEnvironmentConfig();
+				
+				_loadingScreen?.UpdateProgress(0.2f, "Verifying game resources...");
+				
 				InitializeResourceList();
 
 				int totalResources = _resourceVerification.Count;
@@ -45,9 +56,8 @@ namespace DangboxGame.Scripts {
 					_resourceVerification[key] = exists;
 
 					verifiedResources++;
-					_verificationProgress = (float)verifiedResources / totalResources;
+					_verificationProgress = 0.2f + (0.8f * verifiedResources / totalResources);
 
-					// Update loading screen progress
 					_loadingScreen?.UpdateProgress(_verificationProgress, $"Verifying: {System.IO.Path.GetFileName(key)}");
 
 					if (!exists) {
@@ -79,18 +89,67 @@ namespace DangboxGame.Scripts {
 			}
 		}
 
+		private async System.Threading.Tasks.Task WaitForEnvironmentConfig() {
+			int maxWaitTime = 100; // 10 seconds max wait
+			int waitCount = 0;
+			
+			while (EnvironmentConfig.Instance == null && waitCount < maxWaitTime) {
+				await ToSignal(GetTree().CreateTimer(0.1), Timer.SignalName.Timeout);
+				waitCount++;
+			}
+			
+			if (EnvironmentConfig.Instance == null) {
+				throw new InvalidOperationException("EnvironmentConfig failed to initialize within timeout period");
+			}
+			
+			GD.Print($"EnvironmentConfig ready after {waitCount * 0.1f} seconds");
+		}
+
+		private void VerifyEnvironmentConfig() {
+			var envConfig = EnvironmentConfig.Instance;
+			if (envConfig == null) {
+				throw new InvalidOperationException("EnvironmentConfig instance is null");
+			}
+
+			// Verify environment detection
+			var currentEnv = envConfig.GetCurrentEnvironment();
+			GD.Print($"Current environment: {currentEnv}");
+
+			// Verify config path
+			string configPath = envConfig.GetConfigPath();
+			GD.Print($"Config path: {configPath}");
+
+			// Test some configuration values
+			string testScenePath = envConfig.GetValue<string>("scene_main_menu", "");
+			string testDataPath = envConfig.GetValue<string>("data_saves", "");
+			bool debugEnabled = envConfig.GetValue<bool>("debug_enabled", false);
+
+			GD.Print($"Sample config values - Scene: {testScenePath}, Data: {testDataPath}, Debug: {debugEnabled}");
+
+			if (string.IsNullOrEmpty(testScenePath)) {
+				throw new InvalidOperationException("EnvironmentConfig failed to provide valid scene path");
+			}
+		}
+
 		private void InitializeResourceList() {
 			_resourceVerification.Clear();
 
-			// Use constants for consistency
-			_resourceVerification.Add(Constants.ScenePath.MainMenu, false);
-			_resourceVerification.Add(Constants.ScenePath.TestLevel, false);
-			_resourceVerification.Add(Constants.ScenePath.SettingsMenu, false);
-			_resourceVerification.Add(Constants.ScenePath.PauseMenu, false);
-			_resourceVerification.Add(Constants.PrefabPath.Player, false);
-			_resourceVerification.Add(Constants.PrefabPath.Camera, false);
-			_resourceVerification.Add(Constants.PrefabPath.HUD, false);
-			_resourceVerification.Add(Constants.ScriptPath.PlayerInput, false);
+			var envConfig = EnvironmentConfig.Instance;
+			if (envConfig == null) {
+				throw new InvalidOperationException("EnvironmentConfig not available during resource list initialization");
+			}
+
+			// Use EnvironmentConfig for all resource paths
+			_resourceVerification.Add(envConfig.GetValue<string>("scene_main_menu"), false);
+			_resourceVerification.Add(envConfig.GetValue<string>("scene_test_level"), false);
+			_resourceVerification.Add(envConfig.GetValue<string>("scene_settings_menu"), false);
+			_resourceVerification.Add(envConfig.GetValue<string>("scene_pause_menu"), false);
+			_resourceVerification.Add(envConfig.GetValue<string>("prefab_player"), false);
+			_resourceVerification.Add(envConfig.GetValue<string>("prefab_camera"), false);
+			_resourceVerification.Add(envConfig.GetValue<string>("prefab_hud"), false);
+			_resourceVerification.Add(envConfig.GetValue<string>("script_player_input"), false);
+
+			GD.Print($"Initialized resource verification list with {_resourceVerification.Count} items from EnvironmentConfig");
 		}
 
 		private void ProceedToGame() {

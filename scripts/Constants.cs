@@ -1,26 +1,35 @@
 using Godot;
+using DangboxGame.Scripts.Core.Environment;
 
 namespace DangboxGame.Scripts {
 	public static class Constants {
 		// Scene Paths
 		public static class ScenePath {
-			public const string MainMenu = "res://scenes/ui/MainScreen.tscn";
-			public const string SettingsMenu = "res://scenes/ui/SettingsMenu.tscn";
-			public const string PauseMenu = "res://scenes/ui/PauseMenu.tscn";
-			public const string TestLevel = "res://scenes/TestLevel.tscn";
-			public const string MainGameScene = "res://scenes/Main.tscn";
+			public static string MainMenu => EnvironmentConfig.Instance?.GetValue<string>("scene_main_menu") ?? "res://scenes/ui/MainScreen.tscn";
+			public static string SettingsMenu => EnvironmentConfig.Instance?.GetValue<string>("scene_settings_menu") ?? "res://scenes/ui/SettingsMenu.tscn";
+			public static string PauseMenu => EnvironmentConfig.Instance?.GetValue<string>("scene_pause_menu") ?? "res://scenes/ui/PauseMenu.tscn";
+			public static string TestLevel => EnvironmentConfig.Instance?.GetValue<string>("scene_test_level") ?? "res://scenes/TestLevel.tscn";
+			public static string MainGameScene => EnvironmentConfig.Instance?.GetValue<string>("scene_main_game") ?? "res://scenes/Main.tscn";
 		}
 
 		// Prefab Paths
 		public static class PrefabPath {
-			public const string Player = "res://assets/prefabs/character_body_3d.tscn";
-			public const string Camera = "res://assets/prefabs/_camera.tscn";
-			public const string HUD = "res://scenes/ui/HUD.tscn";
+			public static string Player => EnvironmentConfig.Instance?.GetValue<string>("prefab_player") ?? "res://assets/prefabs/character_body_3d.tscn";
+			public static string Camera => EnvironmentConfig.Instance?.GetValue<string>("prefab_camera") ?? "res://assets/prefabs/_camera.tscn";
+			public static string HUD => EnvironmentConfig.Instance?.GetValue<string>("prefab_hud") ?? "res://scenes/ui/HUD.tscn";
 		}
 
 		// Script Paths
 		public static class ScriptPath {
-			public const string PlayerInput = "res://scripts/player/PlayerInput.cs";
+			public static string PlayerInput => EnvironmentConfig.Instance?.GetValue<string>("script_player_input") ?? "res://scripts/player/PlayerInput.cs";
+		}
+		
+		// Data Paths (new - system-specific)
+		public static class DataPath {
+			public static string Saves => EnvironmentConfig.Instance?.GetValue<string>("data_saves") ?? "user://saves/";
+			public static string Settings => EnvironmentConfig.Instance?.GetValue<string>("data_settings") ?? "user://settings/";
+			public static string Temp => EnvironmentConfig.Instance?.GetValue<string>("data_temp") ?? "user://temp/";
+			public static string Logs => EnvironmentConfig.Instance?.GetValue<string>("data_logs") ?? "user://logs/";
 		}
 	}
 }

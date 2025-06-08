@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using DangboxGame.Scripts.Player;
 
 namespace DangboxGame.Scripts.UI {
 	public partial class SettingsMenu : Control {
@@ -109,22 +110,11 @@ namespace DangboxGame.Scripts.UI {
 		}
 		
 		private void InitializeSettingsValues() {
-			// Access GameSettings.Instance safely
-			var settings = GameSettings.Instance;
+			// Access GameSettings through GameManager
+			var settings = GameManager.Instance?.Settings;
 			if (settings == null) {
-				GD.PrintErr("GameSettings.Instance is null in SettingsMenu.InitializeSettingsValues");
-				
-				// Try to find or create GameSettings if it doesn't exist
-				if (GameManager.Instance != null) {
-					GameManager.Instance.GetType().GetMethod("EnsureGameSettingsExists", 
-						System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(GameManager.Instance, null);
-					settings = GameSettings.Instance;
-				}
-				
-				if (settings == null) {
-					GD.PrintErr("Failed to create GameSettings instance");
-					return;
-				}
+				GD.PrintErr("GameSettings not available in SettingsMenu.InitializeSettingsValues");
+				return;
 			}
 			
 			// Field of View
@@ -160,8 +150,8 @@ namespace DangboxGame.Scripts.UI {
 			SafeConnect(_settingsTree, "item_activated", Callable.From(OnTreeItemActivated));
 			
 			// Make sure FOV is initialized
-			if (_fovSlider != null && GameSettings.Instance != null) {
-				_fovSlider.Value = GameSettings.Instance.GetFOV();
+			if (_fovSlider != null && GameManager.Instance?.Settings != null) {
+				_fovSlider.Value = GameManager.Instance.Settings.GetFOV();
 				UpdateFOVLabel((float)_fovSlider.Value);
 			}
 		}
@@ -212,14 +202,11 @@ namespace DangboxGame.Scripts.UI {
 			_resScaleSlider.Step = 5;
 			_resScaleSlider.TickCount = 7;
 			_resScaleSlider.TicksOnBorders = true;
-			// Set minimum width for better interaction
-			_resScaleSlider.CustomMinimumSize = new Vector2(200, 0);
-			_resScaleSlider.SizeFlagsHorizontal = SizeFlags.ExpandFill;
 			
 			// Get the current value from GameSettings
 			float currentScale = 100;
-			if (GameSettings.Instance != null) {
-				currentScale = GameSettings.Instance.GetResolutionScale() * 100;
+			if (GameManager.Instance?.Settings != null) {
+				currentScale = GameManager.Instance.Settings.GetResolutionScale() * 100;
 			}
 			_resScaleSlider.Value = currentScale;
 			
@@ -266,14 +253,11 @@ namespace DangboxGame.Scripts.UI {
 			_masterVolumeSlider.Step = 1;
 			_masterVolumeSlider.TickCount = 5;
 			_masterVolumeSlider.TicksOnBorders = true;
-			// Set minimum width for better interaction
-			_masterVolumeSlider.CustomMinimumSize = new Vector2(200, 0);
-			_masterVolumeSlider.SizeFlagsHorizontal = SizeFlags.ExpandFill;
 			
 			// Get the current value from GameSettings
 			float currentVolume = 100;
-			if (GameSettings.Instance != null) {
-				currentVolume = GameSettings.Instance.GetMasterVolume() * 100;
+			if (GameManager.Instance?.Settings != null) {
+				currentVolume = GameManager.Instance.Settings.GetMasterVolume() * 100;
 			}
 			_masterVolumeSlider.Value = currentVolume;
 			
@@ -325,8 +309,8 @@ namespace DangboxGame.Scripts.UI {
 			
 			// Get the current value from GameSettings
 			float currentOpacity = 80;
-			if (GameSettings.Instance != null) {
-				currentOpacity = GameSettings.Instance.GetMenuOpacity() * 100;
+			if (GameManager.Instance?.Settings != null) {
+				currentOpacity = GameManager.Instance.Settings.GetMenuOpacity() * 100;
 			}
 			opacitySlider.Value = currentOpacity;
 			
@@ -370,8 +354,8 @@ namespace DangboxGame.Scripts.UI {
 			
 			if (edited == _fullscreenItem) {
 				bool isChecked = _fullscreenItem.IsChecked(1);
-				if (GameSettings.Instance != null) {
-					GameSettings.Instance.SetFullscreen(isChecked);
+				if (GameManager.Instance?.Settings != null) {
+					GameManager.Instance.Settings.SetFullscreen(isChecked);
 					_settingsChanged = true;
 				}
 			}
@@ -389,8 +373,8 @@ namespace DangboxGame.Scripts.UI {
 		private void OnResScaleChanged(double value) {
 			float resScale = (float)value / 100.0f; // Convert percentage to scale factor
 			
-			if (GameSettings.Instance != null) {
-				GameSettings.Instance.SetResolutionScale(resScale);
+			if (GameManager.Instance?.Settings != null) {
+				GameManager.Instance.Settings.SetResolutionScale(resScale);
 				_settingsChanged = true;
 
 				_resScaleItem.SetText(1, $"{value:F0}%");
@@ -405,8 +389,8 @@ namespace DangboxGame.Scripts.UI {
 		
 		private void OnFOVChanged(double value) {
 			float fov = (float)value;
-			if (GameSettings.Instance != null) {
-				GameSettings.Instance.SetFOV(fov);
+			if (GameManager.Instance?.Settings != null) {
+				GameManager.Instance.Settings.SetFOV(fov);
 				_settingsChanged = true;
 				
 				// Update label
@@ -425,8 +409,8 @@ namespace DangboxGame.Scripts.UI {
 		
 		private void OnVolumeChanged(double value) {
 			float volume = (float)value / 100.0f; // Convert to 0-1 range
-			if (GameSettings.Instance != null) {
-				GameSettings.Instance.SetMasterVolume(volume);
+			if (GameManager.Instance?.Settings != null) {
+				GameManager.Instance.Settings.SetMasterVolume(volume);
 				_settingsChanged = true;
 				
 				// Update tree item and value label
@@ -442,8 +426,8 @@ namespace DangboxGame.Scripts.UI {
 		
 		private void OnOpacityChanged(double value) {
 			float opacity = (float)value / 100.0f; // Convert to 0-1 range
-			if (GameSettings.Instance != null) {
-				GameSettings.Instance.SetMenuOpacity(opacity);
+			if (GameManager.Instance?.Settings != null) {
+				GameManager.Instance.Settings.SetMenuOpacity(opacity);
 				_settingsChanged = true;
 				
 				// Update tree item and value label
@@ -467,26 +451,30 @@ namespace DangboxGame.Scripts.UI {
 		
 		private void OnBackPressed() {
 			// Save changes if any were made
-			if (_settingsChanged && GameSettings.Instance != null) {
-				GameSettings.Instance.SaveSettings();
+			if (_settingsChanged && GameManager.Instance?.Settings != null) {
+				GameManager.Instance.Settings.SaveSettings();
 			}
-			
-			// Simplified: let UIManager handle the context automatically
-			if (UIManager.Instance != null) {
+
+			var playerManager = GameManager.Instance?.PlayerManager;
+			var localPlayer = playerManager?.GetLocalPlayer();
+
+			if (localPlayer is PlayerController player) {
+				// If the player is in-game, return to the base pause menu
+				UIManager.Instance.ChangeUIState(UIManager.UIState.PauseMenu);
+			} else {
+				// Otherwise, go to the main menu
 				UIManager.Instance.ChangeUIState(UIManager.UIState.MainMenu);
 			}
 		}
 		
 		private void OnApplyPressed() {
-			if (GameSettings.Instance != null) {
-				GameSettings.Instance.SaveSettings();
-				GameSettings.Instance.EmitSignal(GameSettings.SignalName.SettingsUpdated);
+			if (GameManager.Instance?.Settings != null) {
+				GameManager.Instance.Settings.SaveSettings();
+				GameManager.Instance.Settings.EmitSignal(GameSettings.SignalName.SettingsUpdated);
 				_settingsChanged = false;
 				
-				// Refresh UI to reflect any changes
 				RefreshAllValues();
 				
-				// Show a notification that settings were applied
 				var notification = new Label();
 				notification.Text = "Settings Applied";
 				notification.HorizontalAlignment = HorizontalAlignment.Center;
@@ -494,7 +482,6 @@ namespace DangboxGame.Scripts.UI {
 				
 				GetNode<VBoxContainer>("VBoxContainer").AddChild(notification);
 				
-				// Remove the notification after a delay
 				var timer = GetTree().CreateTimer(2.0);
 				timer.Timeout += () => {
 					if (notification != null && !notification.IsQueuedForDeletion()) {
@@ -506,44 +493,46 @@ namespace DangboxGame.Scripts.UI {
 		
 		// Add a method to refresh all visible values from GameSettings
 		private void RefreshAllValues() {
-			if (GameSettings.Instance == null) return;
+			if (GameManager.Instance?.Settings == null) return;
+			
+			var settings = GameManager.Instance.Settings;
 			
 			// Update tree items
 			if (_fullscreenItem != null) {
-				_fullscreenItem.SetChecked(1, GameSettings.Instance.GetFullscreen());
+				_fullscreenItem.SetChecked(1, settings.GetFullscreen());
 			}
 			
 			if (_resScaleItem != null) {
-				float resScale = GameSettings.Instance.GetResolutionScale();
+				float resScale = settings.GetResolutionScale();
 				_resScaleItem.SetText(1, $"{resScale * 100:F0}%");
 			}
 			
 			if (_masterVolumeItem != null) {
-				float volume = GameSettings.Instance.GetMasterVolume();
+				float volume = settings.GetMasterVolume();
 				_masterVolumeItem.SetText(1, $"{volume * 100:F0}%");
 			}
 
 			if (_menuOpacityItem != null) {
-				float opacity = GameSettings.Instance.GetMenuOpacity();
+				float opacity = settings.GetMenuOpacity();
 				_menuOpacityItem.SetText(1, $"{opacity * 100:F0}%");
 			}
 			
 			// Update FOV slider
 			if (_fovSlider != null) {
-				_fovSlider.Value = GameSettings.Instance.GetFOV();
+				_fovSlider.Value = settings.GetFOV();
 				UpdateFOVLabel((float)_fovSlider.Value);
 			}
 			
 			// Update any visible dynamic sliders
 			var resScaleValueLabel = GetNodeOrNull<Label>("VBoxContainer/TempSliderContainer/ResScaleValueLabel");
 			if (resScaleValueLabel != null && _resScaleSlider != null) {
-				_resScaleSlider.Value = GameSettings.Instance.GetResolutionScale() * 100;
+				_resScaleSlider.Value = settings.GetResolutionScale() * 100;
 				resScaleValueLabel.Text = $"{_resScaleSlider.Value:F0}%";
 			}
 			
 			var volumeValueLabel = GetNodeOrNull<Label>("VBoxContainer/TempSliderContainer/VolumeValueLabel");
 			if (volumeValueLabel != null && _masterVolumeSlider != null) {
-				_masterVolumeSlider.Value = GameSettings.Instance.GetMasterVolume() * 100;
+				_masterVolumeSlider.Value = settings.GetMasterVolume() * 100;
 				volumeValueLabel.Text = $"{_masterVolumeSlider.Value:F0}%";
 			}
 
@@ -551,7 +540,7 @@ namespace DangboxGame.Scripts.UI {
 			if (opacityValueLabel != null) {
 				var opacitySlider = GetNodeOrNull<HSlider>("VBoxContainer/TempSliderContainer/TempOpacitySlider");
 				if (opacitySlider != null) {
-					opacitySlider.Value = GameSettings.Instance.GetMenuOpacity() * 100;
+					opacitySlider.Value = settings.GetMenuOpacity() * 100;
 					opacityValueLabel.Text = $"{opacitySlider.Value:F0}%";
 				}
 			}

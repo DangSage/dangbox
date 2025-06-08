@@ -4,22 +4,32 @@ namespace DangboxGame.Scripts.Player {
 	public partial class PlayerAnimation : Node {
 		private Skeleton3D _skeleton;
 		private PlayerController _playerController;
+		private Node3D actualHead;
 		private AnimationPlayer _animPlayer;
 
 		private string _currentState = "";
+		private bool _isInitialized = false;
 
 		public override void _Ready() {
-			_skeleton = GetNodeOrNull<Skeleton3D>("./Skeleton3D");
-			if (_skeleton == null) {
-				GD.PrintErr("Skeleton3D node not found!");
-				return;
-			}
+			_skeleton = GetNodeOrNull<Skeleton3D>("Skeleton3D");
 			_playerController = GetNodeOrNull<PlayerController>("../../CharacterBody3D");
 			_animPlayer = GetNodeOrNull<AnimationPlayer>("../AnimationPlayer");
-			
-			if (_playerController == null || _animPlayer == null) {
+			_playerController.PlayerInitialized += OnPlayerInitialized;
+		}
+
+		private void OnPlayerInitialized() {
+			if (_playerController == null || _animPlayer == null || _skeleton == null) {
 				GD.PrintErr("PlayerAnimation: Required nodes not found. Scene structure may be incorrect.");
+				return;
 			}
+
+			actualHead = _playerController._actualHead;
+			if (actualHead == null || !IsInstanceValid(actualHead)) {
+				GD.PrintErr("PlayerAnimation: Actual head node not found or invalid.");
+			} else {
+				GD.Print("PlayerAnimation: Successfully found ActualHead node");
+			}
+			_isInitialized = true;
 		}
 
 		public override void _Process(double delta) {
@@ -27,7 +37,7 @@ namespace DangboxGame.Scripts.Player {
 			if (!IsInstanceValid(this) || !IsInsideTree()) {
 				return;
 			}
-			
+
 			if (_playerController == null || !IsInstanceValid(_playerController) ||
 				_skeleton == null || !IsInstanceValid(_skeleton) ||
 				_animPlayer == null || !IsInstanceValid(_animPlayer)) {
@@ -42,6 +52,10 @@ namespace DangboxGame.Scripts.Player {
 		}
 
 		private void PlayAnimation(string activeModifier) {
+			if (!_isInitialized || _animPlayer == null) {
+				return;
+			}
+			
 			Vector3 velocity = _playerController.Velocity;
 			bool isMoving = Mathf.Abs(velocity.X) > 0.1f || Mathf.Abs(velocity.Z) > 0.1f;
 			float blendTime;
@@ -67,26 +81,33 @@ namespace DangboxGame.Scripts.Player {
 		private void UpdateHeadBone() {
 			// Add safety checks
 			if (_skeleton == null || !IsInstanceValid(_skeleton) ||
-				_playerController == null || !IsInstanceValid(_playerController)) {
+				_playerController == null || !IsInstanceValid(_playerController) ||
+				actualHead == null || !IsInstanceValid(actualHead)) {
 				return;
 			}
-			
+
+			// Instead of setting the bone pose, use SetBoneGlobalPoseOverride for runtime control
+			Transform3D headGlobalTransform = actualHead.GlobalTransform;
+			Basis headBasis = headGlobalTransform.Basis;
+			Vector3 headEuler = headBasis.GetEuler();
+			// Only apply X (pitch) rotation, keep other axes unchanged
 			int headIndex = _skeleton.FindBone("Head");
-			if (headIndex == -1) {
-				return; // Don't spam error messages
-			}
+			Transform3D boneGlobalTransform = _skeleton.GetBoneGlobalPose(headIndex);
 
-			// Check if ActualHead node exists and is valid
-			var actualHead = _playerController.GetNodeOrNull<Node3D>("../ActualHead");
-			if (actualHead == null || !IsInstanceValid(actualHead)) {
-				return;
-			}
+			Basis newBasis = boneGlobalTransform.Basis;
+			Vector3 boneEuler = newBasis.GetEuler();
+			boneEuler.X = headEuler.X; // Only set X rotation
+			newBasis = Basis.FromEuler(boneEuler);
 
-			Transform3D animationPose = _skeleton.GetBonePose(headIndex);
-			Quaternion headRotation = new Quaternion(Vector3.Right, actualHead.Rotation.X);
+			Transform3D newTransform = boneGlobalTransform;
+			newTransform.Basis = newBasis;
 
-			animationPose.Basis = animationPose.Basis.Slerp(new Basis(headRotation), 0.5f);
-			_skeleton.SetBonePose(headIndex, animationPose);
+			_skeleton.SetBoneGlobalPoseOverride(
+				headIndex,
+				newTransform,
+				1.0f, // full weight
+				true  // persistent
+			);
 		}
 
 		private void RotateBody(float delta) {
@@ -95,8 +116,7 @@ namespace DangboxGame.Scripts.Player {
 				_playerController == null || !IsInstanceValid(_playerController)) {
 				return;
 			}
-			
-			var actualHead = _playerController.GetNodeOrNull<Node3D>("../ActualHead");
+
 			if (actualHead == null || !IsInstanceValid(actualHead)) {
 				return;
 			}

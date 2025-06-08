@@ -8,8 +8,8 @@ namespace DangboxGame.Scripts.NBT {
 		public EntityNBT(string name = "root") : base(new CompoundTag(name) {
 			new FloatTag("base_speed", 3.0f),
 			new FloatTag("jump_velocity", 4.0f),
-			new FloatTag("sensitivity", 0.001f),
-			new FloatTag("acceleration", 5.0f),
+			new FloatTag("sensitivity", 0.005f),
+			new FloatTag("acceleration", 6.0f),
 			new FloatTag("gravity", (float)ProjectSettings.GetSetting("physics/3d/default_gravity")),
 			new CompoundTag("speed_modifiers") {
 				new FloatTag("crouch", 0.5f),
@@ -36,7 +36,7 @@ namespace DangboxGame.Scripts.NBT {
 			}
 		}) { }
 
-		public override byte[] Serialize(string path = null) {
+		public override byte[] Serialize(string filename = null) {
 			if (Owner is Node3D node) {
 				var transformTag = GetProperty<ListTag>("transform");
 				if (transformTag != null) {
@@ -60,7 +60,7 @@ namespace DangboxGame.Scripts.NBT {
 				}
 			}
 
-			return base.Serialize(path);
+			return base.Serialize(filename);
 		}
 
 		public void ApplyTransform(Node3D node) {

@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://b2u1epj852pwp"]
+[gd_scene load_steps=11 format=3 uid="uid://b2u1epj852pwp"]
 
 [ext_resource type="Sky" uid="uid://di2qmx4q408yu" path="res://assets/materials/default_sky.tres" id="1_5n3yh"]
 [ext_resource type="Material" uid="uid://dfxo64ecwact5" path="res://assets/materials/test.res" id="4_6e24c"]
+[ext_resource type="PackedScene" uid="uid://un1m2pap326e" path="res://assets/prefabs/character_body_3d.tscn" id="4_i6x8u"]
 [ext_resource type="Material" uid="uid://crl1ca4sry2g4" path="res://assets/materials/player_character_sample.tres" id="5_5ycvo"]
 
 [sub_resource type="Environment" id="Environment_errlg"]
@@ -94,3 +95,6 @@ size = Vector2i(1920, 1080)
 
 [node name="Camera3D" type="Camera3D" parent="Objects/Sprite3D2/SubViewport"]
 transform = Transform3D(1.19249e-08, 0, -1, 0, 1, 0, 1, 0, 1.19249e-08, -3.89372, 2.292, 0)
+
+[node name="CharacterBody3D" parent="." instance=ExtResource("4_i6x8u")]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, -1.42937, 0.0150887, -4.18885)

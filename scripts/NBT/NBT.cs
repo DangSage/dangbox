@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using SharpNBT;
+using DangboxGame.Scripts.Core.Environment;
 
 namespace DangboxGame.Scripts.NBT {
 	[Tool]
@@ -61,28 +62,32 @@ namespace DangboxGame.Scripts.NBT {
 			_data = newData;
 		}
 
-		virtual public byte[] Serialize(string path = null) {
+		virtual public byte[] Serialize(string filename = null) {
 			using var memoryStream = new System.IO.MemoryStream();
 			using (var writer = new TagWriter(memoryStream, FormatOptions.BigEndian)) {
 				writer.WriteTag(_data);
 			}
-			path ??= _filePath;
 
-			if (!string.IsNullOrEmpty(path)) {
-				if (path.StartsWith("res://")) {
-					GD.PrintErr($"Cannot write to res:// in exported builds. Redirecting to user://.");
-					path = path.Replace("res://", "user://");
-				}
+			byte[] data = memoryStream.ToArray();
 
-				System.IO.File.WriteAllBytes(path, memoryStream.ToArray());
-				GD.Print($"NBT data serialized to {path}");
+			if (!string.IsNullOrEmpty(filename)) {
+				EnvironmentPaths.WriteSaveFile(filename, data);
 			} else {
-				GD.Print("NBT data serialized to memory stream.");
+				GD.Print("NBT data serialized to memory stream only.");
 			}
 
-			return memoryStream.ToArray();
+			return data;
 		}
 
+		public void Deserialize(string filename) {
+			byte[] data = EnvironmentPaths.ReadSaveFile(filename);
+			if (data != null) {
+				Deserialize(data);
+			} else {
+				GD.PrintErr($"Failed to load NBT file: {filename}");
+				_data = new CompoundTag("root");
+			}
+		}
 
 		public void Deserialize(byte[] bytes) {
 				using var stream = new System.IO.MemoryStream(bytes);

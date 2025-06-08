@@ -1,4 +1,7 @@
-[gd_scene format=3 uid="uid://t0h5ffi75t2n"]
+[gd_scene load_steps=3 format=3 uid="uid://t0h5ffi75t2n"]
+
+[ext_resource type="Environment" uid="uid://cl4jo5dnisv50" path="res://assets/prefabs/world_environment.tres" id="1_36rjk"]
+[ext_resource type="Compositor" uid="uid://cwekbcs5whxkr" path="res://assets/prefabs/main_compositor.tres" id="2_k1mf0"]
 
 [node name="_Camera" type="Node"]
 
@@ -10,8 +13,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.1)
 [node name="ActualHead" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.1)
 
-[node name="PlayerInput" type="Camera3D" parent="ActualHead" groups=["cameras"]]
+[node name="ActualCamera" type="Camera3D" parent="ActualHead" groups=["cameras"]]
 cull_mask = 1048063
+environment = ExtResource("1_36rjk")
+compositor = ExtResource("2_k1mf0")
 doppler_tracking = 1
 current = true
 fov = 90.0

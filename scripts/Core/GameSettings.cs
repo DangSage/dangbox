@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 namespace DangboxGame.Scripts {
 	public partial class GameSettings : Node {
-		public static GameSettings Instance { get; private set; }
-
-		private const string SettingsFilePath = "user://game_settings.cfg";
+		private string SettingsFilePath => System.IO.Path.Combine(Constants.DataPath.Settings, "game_settings.cfg");
 
 		// Make settings accessible for UI
 		public readonly Dictionary<string, Variant> _settings = new() {
-			{ "save_path", "user://saves/" },
+			{ "save_path", Constants.DataPath.Saves },
+			{ "resolution_width", 1920 },
+			{ "resolution_height", 1080 },
 			{ "resolution_scale", 1.0f },
 			{ "fullscreen", true },
 			{ "volume_master", 1.0f },
@@ -24,24 +24,11 @@ namespace DangboxGame.Scripts {
 		public delegate void SettingsUpdatedEventHandler();
 
 		public override void _Ready() {
-			// Ensure only one instance exists
-			if (Instance != null && Instance != this) {
-				QueueFree();
-				return;
-			}
-
-			Instance = this;
-
 			// Make the node persistent
 			ProcessMode = ProcessModeEnum.Always;
 
-			// Only set auto accept quit, don't try to add self to root again
-			GetTree().AutoAcceptQuit = true;
-
 			LoadSettings();
 			ApplyInitialSettings();
-
-			GD.Print("GameSettings initialized");
 		}
 
 		private void ApplyInitialSettings() {
@@ -61,7 +48,7 @@ namespace DangboxGame.Scripts {
 		}
 
 		public string GetSavePath() {
-			return _settings.ContainsKey("save_path") ? _settings["save_path"].AsString() : "user://saves/";
+			return _settings.ContainsKey("save_path") ? _settings["save_path"].AsString() : Constants.DataPath.Saves;
 		}
 
 		public void SetSavePath(string newPath) {
@@ -81,8 +68,7 @@ namespace DangboxGame.Scripts {
 
 			float windowWidth = DisplayServer.WindowGetSize().X;
 			float windowHeight = DisplayServer.WindowGetSize().Y;
-			RenderingServer.ViewportSetSize(GetViewport().GetViewportRid(),
-				(int)(windowWidth * scale), (int)(windowHeight * scale));
+			GetViewport().Scaling3DScale = scale;
 
 			GameEvents.EmitSettingUpdated("resolution_scale", scale);
 		}
@@ -175,13 +161,10 @@ namespace DangboxGame.Scripts {
 			GameEvents.EmitSettingsChanged();
 		}
 
-		// Called when the node is about to be removed from the scene
 		public override void _ExitTree() {
-			// Only clear the static instance if this is the current instance
-			if (Instance == this) {
-				Instance = null;
-				GD.Print("GameSettings singleton instance cleared");
-			}
+			// Save settings when exiting the game
+			SaveSettings();
+			GD.Print("GameSettings saved and exiting.");
 		}
 	}
 }
