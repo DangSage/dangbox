@@ -67,29 +67,27 @@ namespace DangboxGame.Scripts.Player {
 			_animPlayer.SpeedScale = Mathf.Clamp(speedScale, 0.5f, 2.0f);
 		}
 
-        private void UpdateHeadBone() {
-            int headIndex = _skeleton.FindBone("Head");
-            if (headIndex == -1) {
-                GD.PrintErr("Head bone not found in skeleton");
-                return;
-            }
+		[System.Obsolete]
+		private void UpdateHeadBone() {
+			int headIndex = _skeleton.FindBone("Head");
+			if (headIndex == -1) {
+				GD.PrintErr("Head bone not found in skeleton");
+				return;
+			}
 
-            Vector3 headRotation = actualHead.Rotation;
-            Transform3D currentGlobalPose = _skeleton.GetBoneGlobalPose(headIndex);
+			Vector3 headRotation = actualHead.Rotation;
+			Transform3D currentGlobalPose = _skeleton.GetBoneGlobalPose(headIndex);
 
-            Vector3 currentEuler = currentGlobalPose.Basis.GetEuler();
-            currentEuler.X = headRotation.X; // Only override pitch
-            Transform3D newGlobalPose = new(
-                Basis.FromEuler(currentEuler),
-                currentGlobalPose.Origin // Keep the animated position
-            );
+			Vector3 currentEuler = currentGlobalPose.Basis.GetEuler();
+			currentEuler.X = headRotation.X; // Only override pitch
+			Transform3D newGlobalPose = new Transform3D(
+				Basis.FromEuler(currentEuler), 
+				currentGlobalPose.Origin // Keep the animated position
+			);
 
-            // TODO: Use a more appropriate method for setting bone pose
-            // SetBoneGlobalPoseOverride is deprecated, but alternative does not correctly
-            // handle overrides without affecting the animation system.
-#pragma warning disable CS0618 // Type or member is obsolete
-            _skeleton.SetBoneGlobalPoseOverride(headIndex, newGlobalPose, 0.5f, true);
-#pragma warning restore CS0618 // Type or member is obsolete
+			// TODO: Use a more appropriate method for setting bone pose
+			_skeleton.SetBonePose(headIndex, newGlobalPose);
+			// _skeleton.SetBoneGlobalPoseOverride(headIndex, newGlobalPose, 0.5f, true);
 		}
 
 		private void RotateBody(float delta) {
