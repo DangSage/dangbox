@@ -88,7 +88,7 @@ namespace DangboxGame.Scripts {
 				return;
 			}
 
-			Vector3 spawnPosition = new(0, 5, 0);
+			Vector3 spawnPosition = new(0, 0, 0);
 			GameEvents.EmitPlayerSpawnRequested(0, spawnPosition, Vector3.Zero);
 		}
 
@@ -252,11 +252,15 @@ namespace DangboxGame.Scripts {
 		}
 
 		private void OnMainMenuRequested() {
+			// Ensure player input is re-enabled before cleanup
+			GameEvents.EmitPlayerInputEnabled(true);
 			CleanupPlayerManager();
 			UIManager.Instance?.RestartToStartMenu();
 		}
 
 		private void OnQuitGameRequested() {
+			// Ensure player input is re-enabled before cleanup
+			GameEvents.EmitPlayerInputEnabled(true);
 			CleanupPlayerManager();
 			Settings?.SaveSettings();
 			EnvironmentPaths.WriteLog("shutdown", $"Game shutdown at {System.DateTime.Now}");

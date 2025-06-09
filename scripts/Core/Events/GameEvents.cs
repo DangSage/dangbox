@@ -27,6 +27,7 @@ namespace DangboxGame.Scripts {
 		public static event System.Action GameResumeRequested;
 		public static event System.Action MainMenuRequested;
 		public static event System.Action QuitGameRequested;
+		public static event System.Action<bool> PlayerInputEnabled;
 
 		public override void _Ready() {
 			if (_instance != null) {
@@ -38,6 +39,10 @@ namespace DangboxGame.Scripts {
 		}
 
 		// Static emit methods - no instance needed
+		public static void EmitPlayerInputEnabled(bool enabled) {
+			PlayerInputEnabled?.Invoke(enabled);
+		}
+
 		public static void EmitUIStateChanged(string state) {
 			UIStateChanged?.Invoke(state);
 		}

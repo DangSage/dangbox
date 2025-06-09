@@ -2,8 +2,7 @@ using Godot;
 using DangboxGame.Scripts.NBT;
 
 namespace DangboxGame.Scripts.Player {
-	public partial class PlayerController : CharacterBody3D
-	{
+	public partial class PlayerController : CharacterBody3D {
 		[Signal]
 		public delegate void PlayerInitializedEventHandler();
 
@@ -43,8 +42,7 @@ namespace DangboxGame.Scripts.Player {
 			InitializePlayer();
 		}
 
-		private void InitializePlayer()
-		{
+		private void InitializePlayer() {
 			_headTarget = GetNodeOrNull<Node3D>("_Camera/HeadTarget");
 			_cameraTarget = GetNodeOrNull<Node3D>("_Camera/HeadTarget/CameraTarget");
 			_actualHead = GetNodeOrNull<Node3D>("_Camera/ActualHead");
@@ -52,8 +50,7 @@ namespace DangboxGame.Scripts.Player {
 
 			_playerInput = GetNodeOrNull<PlayerInput>("_PlayerInput");
 
-			if (_headTarget == null || _cameraTarget == null || _actualHead == null || _playerInput == null)
-			{
+			if (_headTarget == null || _cameraTarget == null || _actualHead == null || _playerInput == null) {
 				GD.PrintErr("PlayerController: One or more required nodes were NOT loaded.");
 				return;
 			}
@@ -104,11 +101,10 @@ namespace DangboxGame.Scripts.Player {
 				_headTarget.Rotation.Y,
 				_actualHead.Rotation.Z
 			);
-			_actualHead.Rotation = _actualHead.Rotation.Lerp(targetRotation, _cachedAcceleration * 4 * (float)delta);
+			_actualHead.Rotation = targetRotation;
 
 			Vector3 direction = Vector3.Zero;
-			if (InputDir != Vector2.Zero)
-			{
+			if (InputDir != Vector2.Zero) {
 				Basis horizontalBasis = new Basis(Vector3.Up, _actualHead.Rotation.Y);
 				direction = (horizontalBasis * new Vector3(InputDir.X, 0, InputDir.Y)).Normalized();
 			}
@@ -125,8 +121,7 @@ namespace DangboxGame.Scripts.Player {
 			MoveAndSlide();
 		}
 
-		private void HandleMouseMovement()
-		{
+		private void HandleMouseMovement() {
 			float sensitivity = _playerNbt.GetProperty<float>("sensitivity");
 			_headTarget.RotateY(-MouseMovement.X * sensitivity);
 			_cameraTarget.RotateX(-MouseMovement.Y * sensitivity);
@@ -142,16 +137,12 @@ namespace DangboxGame.Scripts.Player {
 		private void ApplyVelocity(Vector3 direction, float delta) {
 			float currentSpeed = _playerNbt.GetCurrentSpeed(activeModifier);
 
-			if (IsOnFloor())
-			{
+			if (IsOnFloor()) {
 				Velocity = new Vector3(direction.X * currentSpeed, Velocity.Y, direction.Z * currentSpeed);
-				if (JumpPressed)
-				{
+				if (JumpPressed) {
 					Velocity = new Vector3(Velocity.X, _cachedJumpVelocity, Velocity.Z);
 				}
-			}
-			else
-			{
+			} else {
 				Velocity = new Vector3(
 					Mathf.Lerp(Velocity.X, direction.X * currentSpeed, _cachedAcceleration * delta),
 					Velocity.Y - _cachedGravity * delta,
@@ -160,26 +151,21 @@ namespace DangboxGame.Scripts.Player {
 			}
 		}
 
-		private void ApplyFOVSetting()
-		{
-			if (GameManager.Instance?.Settings != null && _actualHead is Camera3D camera)
-			{
+		private void ApplyFOVSetting() {
+			if (GameManager.Instance?.Settings != null && _actualHead is Camera3D camera) {
 				float fov = GameManager.Instance.Settings.GetFOV();
 				camera.Fov = fov;
 				GD.Print($"Applied FOV setting: {fov}");
 			}
 		}
 
-		private void OnSettingUpdated(string settingName, Variant value)
-		{
-			if (settingName == "graphics_fov")
-			{
+		private void OnSettingUpdated(string settingName, Variant value) {
+			if (settingName == "graphics_fov") {
 				ApplyFOVSetting();
 			}
 		}
 
-		private bool ValidateNodes()
-		{
+		private bool ValidateNodes() {
 			return _actualHead != null && IsInstanceValid(_actualHead) &&
 				_cameraTarget != null && IsInstanceValid(_cameraTarget) &&
 				_headTarget != null && IsInstanceValid(_headTarget) &&

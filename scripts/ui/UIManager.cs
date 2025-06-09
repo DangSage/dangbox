@@ -148,7 +148,8 @@ namespace DangboxGame.Scripts.UI {
 			// Reset state but keep UIManager alive
 			_currentState = UIState.None;
 			_isPaused = false;
-			GetTree().Paused = false;
+			// Re-enable player input before scene change
+			GameEvents.EmitPlayerInputEnabled(true);
 			Input.MouseMode = Input.MouseModeEnum.Visible;
 			
 			// Hide backgrounds during restart
@@ -253,23 +254,25 @@ namespace DangboxGame.Scripts.UI {
 			switch (newState) {
 				case UIState.PauseMenu:
 					_isPaused = true;
-					GetTree().Paused = true;
+					// Don't pause the tree, just disable player input
+					GameEvents.EmitPlayerInputEnabled(false);
 					Input.MouseMode = Input.MouseModeEnum.Visible;
 					break;
 				case UIState.HUD:
 					if (_isPaused) {
 						_isPaused = false;
-						GetTree().Paused = false;
+						// Re-enable player input
+						GameEvents.EmitPlayerInputEnabled(true);
 						Input.MouseMode = Input.MouseModeEnum.Captured;
 					}
 					break;
 				case UIState.MainMenu:
 				case UIState.SettingsMenu:
-					// Always unpause when going to menu states
+					// Always disable player input when in menu states
 					if (_isPaused) {
 						_isPaused = false;
-						GetTree().Paused = false;
 					}
+					GameEvents.EmitPlayerInputEnabled(false);
 					Input.MouseMode = Input.MouseModeEnum.Visible;
 					break;
 			}

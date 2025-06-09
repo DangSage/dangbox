@@ -67,32 +67,29 @@ namespace DangboxGame.Scripts.Player {
 			_animPlayer.SpeedScale = Mathf.Clamp(speedScale, 0.5f, 2.0f);
 		}
 
-		private void UpdateHeadBone() {
-			if (_skeleton == null || !IsInstanceValid(_skeleton) ||
-				_playerController == null || !IsInstanceValid(_playerController) ||
-				actualHead == null || !IsInstanceValid(actualHead)) {
-				return;
-			}
+        private void UpdateHeadBone() {
+            int headIndex = _skeleton.FindBone("Head");
+            if (headIndex == -1) {
+                GD.PrintErr("Head bone not found in skeleton");
+                return;
+            }
 
-			int headIndex = _skeleton.FindBone("Head");
-			if (headIndex == -1) {
-				GD.PrintErr("Head bone not found in skeleton");
-				return;
-			}
+            Vector3 headRotation = actualHead.Rotation;
+            Transform3D currentGlobalPose = _skeleton.GetBoneGlobalPose(headIndex);
 
-			// Get the head's pitch rotation
-			Vector3 headRotation = actualHead.Rotation;
+            Vector3 currentEuler = currentGlobalPose.Basis.GetEuler();
+            currentEuler.X = headRotation.X; // Only override pitch
+            Transform3D newGlobalPose = new(
+                Basis.FromEuler(currentEuler),
+                currentGlobalPose.Origin // Keep the animated position
+            );
 
-			// Use global pose override to work with animations
-			Transform3D currentGlobalPose = _skeleton.GetBoneGlobalPose(headIndex);
-
-			Vector3 currentEuler = currentGlobalPose.Basis.GetEuler();
-			currentEuler.X = headRotation.X;
-			
-			Transform3D newGlobalPose = currentGlobalPose;
-			newGlobalPose.Basis = Basis.FromEuler(currentEuler);
-
-			_skeleton.SetBonePoseRotation(headIndex, newGlobalPose.Basis.GetRotationQuaternion());
+            // TODO: Use a more appropriate method for setting bone pose
+            // SetBoneGlobalPoseOverride is deprecated, but alternative does not correctly
+            // handle overrides without affecting the animation system.
+#pragma warning disable CS0618 // Type or member is obsolete
+            _skeleton.SetBoneGlobalPoseOverride(headIndex, newGlobalPose, 0.5f, true);
+#pragma warning restore CS0618 // Type or member is obsolete
 		}
 
 		private void RotateBody(float delta) {
