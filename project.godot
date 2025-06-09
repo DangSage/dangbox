@@ -29,7 +29,7 @@ UiManager="*res://scripts/ui/UIManager.cs"
 
 [debug]
 
-settings/stdout/print_fps=true
+settings/stdout/print_fps=false
 
 [display]
 
