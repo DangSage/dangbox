@@ -54,14 +54,15 @@ namespace DangboxGame.Scripts.UI {
 			// Configure tree
 			_settingsTree.HideRoot = true;
 			_settingsTree.Columns = 2;
-			_settingsTree.SetColumnTitle(0, "Setting");
-			_settingsTree.SetColumnTitle(1, "Value");
+			// _settingsTree.SetColumnTitle(0, "Setting");
+			// _settingsTree.SetColumnTitle(1, "Value");
 			_settingsTree.SetColumnExpand(0, true);
 			_settingsTree.SetColumnExpand(1, true);
-			_settingsTree.SetColumnCustomMinimumWidth(1, 150);
+            _settingsTree.SetColumnCustomMinimumWidth(0, 150);
+            _settingsTree.SetColumnExpand(1, true);
 			
 			// Create root item (hidden)
-			_rootItem = _settingsTree.CreateItem();
+            _rootItem = _settingsTree.CreateItem();
 			
 			// Create Graphics section
 			_graphicsItem = _settingsTree.CreateItem(_rootItem);
@@ -519,7 +520,8 @@ namespace DangboxGame.Scripts.UI {
 			
 			// Update FOV slider
 			if (_fovSlider != null) {
-				_fovSlider.Value = settings.GetFOV();
+				// _fovSlider.Value = settings.GetFOV();
+                _fovSlider.SetValueNoSignal(settings.GetFOV());
 				UpdateFOVLabel((float)_fovSlider.Value);
 			}
 			
