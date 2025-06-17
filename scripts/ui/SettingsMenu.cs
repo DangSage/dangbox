@@ -22,6 +22,8 @@ namespace DangboxGame.Scripts.UI {
 		private TreeItem _masterVolumeItem;
 		private TreeItem _uiItem;
 		private TreeItem _menuOpacityItem;
+		private TreeItem _controlsItem;
+		private TreeItem _sensitivityItem;
 		
 		// Resolution scale slider (created dynamically)
 		private HSlider _resScaleSlider;
@@ -107,6 +109,19 @@ namespace DangboxGame.Scripts.UI {
 			_menuOpacityItem.SetText(1, "80%");
 			_menuOpacityItem.SetSelectable(1, true);
 			_menuOpacityItem.SetEditable(1, false);
+
+			// Controls section
+			_controlsItem = _settingsTree.CreateItem(_rootItem);
+			_controlsItem.SetText(0, "Controls");
+			_controlsItem.SetSelectable(0, false);
+			_controlsItem.Collapsed = false;
+
+			// Mouse Sensitivity setting
+			_sensitivityItem = _settingsTree.CreateItem(_controlsItem);
+			_sensitivityItem.SetText(0, "Mouse Sensitivity");
+			_sensitivityItem.SetText(1, "33%");
+			_sensitivityItem.SetSelectable(1, true);
+			_sensitivityItem.SetEditable(1, false);
 		}
 		
 		private void InitializeSettingsValues() {
@@ -138,6 +153,10 @@ namespace DangboxGame.Scripts.UI {
 			// Menu opacity
 			float menuOpacity = settings.GetMenuOpacity();
 			_menuOpacityItem.SetText(1, $"{menuOpacity * 100:F0}%");
+
+			// Mouse sensitivity
+			float sensitivity = settings.GetSensitivity();
+			_sensitivityItem.SetText(1, $"{sensitivity * 100:F0}%");
 		}
 		
 		private void ConnectSignals() {
@@ -183,6 +202,8 @@ namespace DangboxGame.Scripts.UI {
 				ShowVolumeSlider();
 			} else if (selected == _menuOpacityItem) {
 				ShowOpacitySlider();
+			} else if (selected == _sensitivityItem) {
+				ShowSensitivitySlider();
 			} else {
 				// Hide all sliders except FOV which is always visible
 				RemoveTemporarySliders();
@@ -344,6 +365,48 @@ namespace DangboxGame.Scripts.UI {
 			}
 		}
 		
+		private void ShowSensitivitySlider() {
+			RemoveTemporarySliders();
+			
+			var sensitivitySlider = new HSlider();
+			sensitivitySlider.Name = "TempSensitivitySlider";
+			sensitivitySlider.MinValue = 1;
+			sensitivitySlider.MaxValue = 100;
+			sensitivitySlider.CustomMinimumSize = new Vector2(200, 0);
+			sensitivitySlider.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+			sensitivitySlider.Step = 1;
+			sensitivitySlider.TickCount = 5;
+			sensitivitySlider.TicksOnBorders = true;
+
+			// Get current value
+			float currentSensitivity = 33;  // Changed default fallback from 33 to match 0.33f * 100
+			if (GameManager.Instance?.Settings != null) {
+				currentSensitivity = GameManager.Instance.Settings.GetSensitivity() * 100;
+			}
+			sensitivitySlider.Value = currentSensitivity;
+			
+			var container = new HBoxContainer();
+			container.Name = "TempSliderContainer";
+			container.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+			
+			var label = new Label();
+			label.Text = "Mouse Sensitivity:";
+			container.AddChild(label);
+			
+			container.AddChild(sensitivitySlider);
+			
+			var valueLabel = new Label();
+			valueLabel.Name = "SensitivityValueLabel";
+			valueLabel.Text = $"{sensitivitySlider.Value:F0}%";
+			valueLabel.HorizontalAlignment = HorizontalAlignment.Right;
+			container.AddChild(valueLabel);
+			
+			GetNode<VBoxContainer>("VBoxContainer").AddChild(container);
+			GetNode<VBoxContainer>("VBoxContainer").MoveChild(container, 2);
+			
+			sensitivitySlider.Connect("value_changed", Callable.From<double>(OnSensitivityChanged));
+		}
+		
 		private void RemoveTemporarySliders() {
 			var tempContainer = GetNodeOrNull<Node>("VBoxContainer/TempSliderContainer");
 			tempContainer?.QueueFree();
@@ -441,6 +504,21 @@ namespace DangboxGame.Scripts.UI {
 			}
 		}
 		
+		private void OnSensitivityChanged(double value) {
+			float sensitivity = (float)value / 100.0f;
+			if (GameManager.Instance?.Settings != null) {
+				GameManager.Instance.Settings.SetSensitivity(sensitivity);
+				_settingsChanged = true;
+				
+				_sensitivityItem.SetText(1, $"{value:F0}%");
+				
+				var valueLabel = GetNodeOrNull<Label>("VBoxContainer/TempSliderContainer/SensitivityValueLabel");
+				if (valueLabel != null) {
+					valueLabel.Text = $"{value:F0}%";
+				}
+			}
+		}
+		
 		private void ApplyFOVToCamera(float fov) {
 			// Find the main camera in the scene and apply FOV
 			var camera = GetViewport().GetCamera3D();
@@ -517,6 +595,11 @@ namespace DangboxGame.Scripts.UI {
 				_menuOpacityItem.SetText(1, $"{opacity * 100:F0}%");
 			}
 			
+			if (_sensitivityItem != null) {
+				float sensitivity = settings.GetSensitivity();
+				_sensitivityItem.SetText(1, $"{sensitivity * 100:F0}%");
+			}
+			
 			// Update FOV slider
 			if (_fovSlider != null) {
 				_fovSlider.Value = settings.GetFOV();
@@ -542,6 +625,15 @@ namespace DangboxGame.Scripts.UI {
 				if (opacitySlider != null) {
 					opacitySlider.Value = settings.GetMenuOpacity() * 100;
 					opacityValueLabel.Text = $"{opacitySlider.Value:F0}%";
+				}
+			}
+
+			var sensitivityValueLabel = GetNodeOrNull<Label>("VBoxContainer/TempSliderContainer/SensitivityValueLabel");
+			if (sensitivityValueLabel != null) {
+				var sensitivitySlider = GetNodeOrNull<HSlider>("VBoxContainer/TempSliderContainer/TempSensitivitySlider");
+				if (sensitivitySlider != null) {
+					sensitivitySlider.Value = settings.GetSensitivity() * 100;
+					sensitivityValueLabel.Text = $"{sensitivitySlider.Value:F0}%";
 				}
 			}
 		}
@@ -571,6 +663,14 @@ namespace DangboxGame.Scripts.UI {
 				var valueLabel = GetNodeOrNull<Label>("VBoxContainer/TempSliderContainer/OpacityValueLabel");
 				if (valueLabel != null) {
 					valueLabel.Text = $"{opacitySlider.Value:F0}%";
+				}
+			}
+
+			var sensitivitySlider = GetNodeOrNull<HSlider>("VBoxContainer/TempSliderContainer/TempSensitivitySlider");
+			if (sensitivitySlider != null) {
+				var valueLabel = GetNodeOrNull<Label>("VBoxContainer/TempSliderContainer/SensitivityValueLabel");
+				if (valueLabel != null) {
+					valueLabel.Text = $"{sensitivitySlider.Value:F0}%";
 				}
 			}
 		}
@@ -624,6 +724,17 @@ namespace DangboxGame.Scripts.UI {
 					if (_fullscreenItem != null) {
 						bool fullscreen = value.AsBool();
 						_fullscreenItem.SetChecked(1, fullscreen);
+					}
+					break;
+				case "input_sensitivity":
+					if (_sensitivityItem != null) {
+						float sensitivity = value.AsSingle();
+						_sensitivityItem.SetText(1, $"{sensitivity * 100:F0}%");
+						
+						var sensitivitySlider = GetNodeOrNull<HSlider>("VBoxContainer/TempSliderContainer/TempSensitivitySlider");
+						if (sensitivitySlider != null) {
+							sensitivitySlider.Value = sensitivity * 100;
+						}
 					}
 					break;
 			}

@@ -17,7 +17,8 @@ namespace DangboxGame.Scripts {
 			{ "volume_music", 0.8f },
 			{ "volume_sfx", 1.0f },
 			{ "ui_menu_opacity", 0.8f },  // New setting for menu backgrounds
-			{ "graphics_fov", 90.0f }  // Default FOV
+			{ "graphics_fov", 90.0f },  // Default FOV
+			{ "input_sensitivity", 0.33f }  // Changed from 0.1f to 0.33f
 		};
 
 		[Signal]
@@ -66,8 +67,6 @@ namespace DangboxGame.Scripts {
 			if (scale < 0.1f || scale > 4.0f) return;
 			_settings["resolution_scale"] = scale;
 
-			float windowWidth = DisplayServer.WindowGetSize().X;
-			float windowHeight = DisplayServer.WindowGetSize().Y;
 			GetViewport().Scaling3DScale = scale;
 
 			GameEvents.EmitSettingUpdated("resolution_scale", scale);
@@ -130,6 +129,17 @@ namespace DangboxGame.Scripts {
 			value = Mathf.Clamp(value, 0f, 1f);
 			_settings["ui_menu_opacity"] = value;
 			GameEvents.EmitSettingUpdated("ui_menu_opacity", value);
+		}
+
+		public float GetSensitivity() {
+			return _settings.ContainsKey("input_sensitivity") ?
+				(float)_settings["input_sensitivity"] : 0.33f;  // Changed fallback from 0.1f to 0.33f
+		}
+
+		public void SetSensitivity(float value) {
+			value = Mathf.Clamp(value, 0.01f, 1.0f);
+			_settings["input_sensitivity"] = value;
+			GameEvents.EmitSettingUpdated("input_sensitivity", value);
 		}
 
 		public void LoadSettings() {

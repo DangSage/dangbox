@@ -1,14 +1,23 @@
-[gd_scene load_steps=17 format=4 uid="uid://un1m2pap326e"]
+[gd_scene load_steps=19 format=4 uid="uid://un1m2pap326e"]
 
 [ext_resource type="Script" uid="uid://x1ykfx84lqv1" path="res://scripts/player/PlayerController.cs" id="1_wufoi"]
 [ext_resource type="Script" uid="uid://co4sg3qsh467d" path="res://scripts/player/PlayerAnimation.cs" id="2_re6ju"]
 [ext_resource type="Material" uid="uid://crl1ca4sry2g4" path="res://assets/materials/player_character_sample.tres" id="3_y4egk"]
 [ext_resource type="PackedScene" uid="uid://t0h5ffi75t2n" path="res://assets/prefabs/_camera.tscn" id="4_re6ju"]
+[ext_resource type="Shader" uid="uid://cmelml8w43jsv" path="res://assets/shaders/player_mesh_hide.gdshader" id="5_8r8lj"]
 [ext_resource type="Script" uid="uid://c2ddj6kh3h3hm" path="res://scripts/player/PlayerInput.cs" id="5_y4egk"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_rpdcm"]
 radius = 2.585
 height = 16.687
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8r8lj"]
+render_priority = 0
+shader = ExtResource("5_8r8lj")
+shader_parameter/hide_head_for_fp = false
+shader_parameter/head_bone_index = 0
+shader_parameter/left_arm_bone_index = 1
+shader_parameter/right_arm_bone_index = 2
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_lpvoh"]
 resource_name = "player_character_3d_Cube_008"
@@ -544,6 +553,7 @@ shape = SubResource("CapsuleShape3D_rpdcm")
 
 [node name="Armature" type="Node3D" parent="."]
 script = ExtResource("2_re6ju")
+_headHidingMaterial = SubResource("ShaderMaterial_8r8lj")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="Armature"]
 bones/0/name = "Body"
