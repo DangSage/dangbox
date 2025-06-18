@@ -6,15 +6,16 @@
 [node name="_Camera" type="Node"]
 
 [node name="HeadTarget" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
 
 [node name="CameraTarget" type="Node3D" parent="HeadTarget"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -0.25)
 
 [node name="ActualHead" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
 
 [node name="ActualCamera" type="Camera3D" parent="ActualHead" groups=["cameras"]]
-cull_mask = 1048063
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -0.25)
 environment = ExtResource("1_36rjk")
 compositor = ExtResource("2_k1mf0")
 doppler_tracking = 1

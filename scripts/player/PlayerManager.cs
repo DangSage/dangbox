@@ -148,6 +148,11 @@ namespace DangboxGame.Scripts.Player {
 			return GetPlayer(0);
 		}
 
+		public PlayerController GetLocalPlayerController() {
+			var player = GetLocalPlayer();
+			return player as PlayerController;
+		}
+
 		public override void _ExitTree() {
 			GameEvents.PlayerSpawnRequested -= OnPlayerSpawnRequested;
 			GameEvents.AllPlayersDespawnRequested -= DespawnAllPlayers;
